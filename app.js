@@ -258,8 +258,8 @@ function prepareNeckEffects(){
  // Distort only the backdrop sampled by the translucent panels.
  const glass=document.createElementNS(ns,'filter');glass.id='paper-glass-refraction';
  glass.setAttribute('x','-5%');glass.setAttribute('y','-5%');glass.setAttribute('width','110%');glass.setAttribute('height','110%');glass.setAttribute('color-interpolation-filters','sRGB');
- const grain=document.createElementNS(ns,'feTurbulence');grain.setAttribute('type','fractalNoise');grain.setAttribute('baseFrequency','.075');grain.setAttribute('numOctaves','2');grain.setAttribute('seed','12');grain.setAttribute('result','grain');
- const refract=document.createElementNS(ns,'feDisplacementMap');refract.setAttribute('in','SourceGraphic');refract.setAttribute('in2','grain');refract.setAttribute('scale','2');refract.setAttribute('xChannelSelector','R');refract.setAttribute('yChannelSelector','G');
+ const grain=document.createElementNS(ns,'feTurbulence');grain.setAttribute('type','fractalNoise');grain.setAttribute('baseFrequency','.025');grain.setAttribute('numOctaves','2');grain.setAttribute('seed','12');grain.setAttribute('result','grain');
+ const refract=document.createElementNS(ns,'feDisplacementMap');refract.setAttribute('in','SourceGraphic');refract.setAttribute('in2','grain');refract.setAttribute('scale','10');refract.setAttribute('xChannelSelector','R');refract.setAttribute('yChannelSelector','G');
  glass.append(grain,refract);defs.append(glass);
 
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
