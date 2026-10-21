@@ -53,7 +53,7 @@ function updatePill(){
  updateSectionMotion();
  // Use rendered scroll position, never the clicked destination or wheel target.
  const y=window.scrollY;
- const stops=pageSections.map(s=>s.getBoundingClientRect().top+y);
+ const stops=pageSections.slice(0,navLinks.length).map(s=>s.getBoundingClientRect().top+y);
  let index=0;
  while(index<stops.length-2&&y>=stops[index+1])index++;
  const next=Math.min(index+1,stops.length-1);
@@ -106,7 +106,6 @@ function shelfAtSection(){
  const section=pageSections[nearestSection()];if(Math.abs(section.getBoundingClientRect().top)>5)return null;
  if(section.id==='books')return {track:bookTrack,move:moveBooks};
  if(section.id==='events')return window.simsimEventShelf||null;
- if(section.id==='instagram')return window.simsimInstagramShelf||null;
  return null;
 }
 function shelfCanMove(shelf,delta){return shelf&&shelf.track.scrollWidth>shelf.track.clientWidth+1&&(delta>0?shelf.track.scrollLeft<shelf.track.scrollWidth-shelf.track.clientWidth-2:shelf.track.scrollLeft>2)}
@@ -255,7 +254,7 @@ function prepareNeckEffects(){
  const defs=document.createElementNS(ns,'defs');svg.append(defs);document.body.append(svg);
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
  const bottomBlur=document.createElement('div');bottomBlur.className='bottom-edge-blur';bottomBlur.setAttribute('aria-hidden','true');document.body.append(bottomBlur);
- const effects=pageSections.map((section,i)=>{
+ const effects=pageSections.filter(section=>section.querySelector('.introduction')).map((section,i)=>{
   const clip=document.createElementNS(ns,'clipPath');clip.id='section-edge-'+i;clip.setAttribute('clipPathUnits','objectBoundingBox');
   const path=document.createElementNS(ns,'path');clip.append(path);defs.append(clip);
   return {panel:section.querySelector('.introduction'),path,id:clip.id,active:false};
