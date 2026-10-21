@@ -259,15 +259,21 @@ function prepareNeckEffects(){
  const glass=document.createElementNS(ns,'filter');glass.id='paper-glass-refraction';
  glass.setAttribute('x','-5%');glass.setAttribute('y','-5%');glass.setAttribute('width','110%');glass.setAttribute('height','110%');glass.setAttribute('color-interpolation-filters','sRGB');
  const grain=document.createElementNS(ns,'feTurbulence');grain.setAttribute('type','fractalNoise');grain.setAttribute('baseFrequency','.025');grain.setAttribute('numOctaves','2');grain.setAttribute('seed','12');grain.setAttribute('result','grain');
- const refract=document.createElementNS(ns,'feDisplacementMap');refract.setAttribute('in','SourceGraphic');refract.setAttribute('in2','grain');refract.setAttribute('scale','10');refract.setAttribute('xChannelSelector','R');refract.setAttribute('yChannelSelector','G');
- glass.append(grain,refract);defs.append(glass);
+ const refract=document.createElementNS(ns,'feDisplacementMap');refract.setAttribute('in','SourceGraphic');refract.setAttribute('in2','grain');refract.setAttribute('scale','24');refract.setAttribute('xChannelSelector','R');refract.setAttribute('yChannelSelector','G');
+ const soften=document.createElementNS(ns,'feGaussianBlur');soften.setAttribute('stdDeviation','5');
+ glass.append(grain,refract,soften);defs.append(glass);
 
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
  const bottomBlur=document.createElement('div');bottomBlur.className='bottom-edge-blur';bottomBlur.setAttribute('aria-hidden','true');document.body.append(bottomBlur);
  const effects=pageSections.map((section,i)=>{
   const clip=document.createElementNS(ns,'clipPath');clip.id='section-edge-'+i;clip.setAttribute('clipPathUnits','objectBoundingBox');
   const path=document.createElementNS(ns,'path');clip.append(path);defs.append(clip);
-  return {panel:section.querySelector('.introduction'),path,id:clip.id,active:false};
+  const panel=section.querySelector('.introduction');
+  const layer=document.createElement('div');layer.className='card-glass-background';layer.setAttribute('aria-hidden','true');
+  const surface=document.createElementNS(ns,'svg');surface.setAttribute('preserveAspectRatio','none');
+  const image=document.createElementNS(ns,'image');image.setAttribute('href',landscape.currentSrc||landscape.src);image.setAttribute('width','100%');image.setAttribute('height','100%');image.setAttribute('preserveAspectRatio','xMidYMid slice');image.setAttribute('filter','url(#paper-glass-refraction)');
+  surface.append(image);layer.append(surface);panel.prepend(layer);
+  return {panel,path,surface,id:clip.id,active:false};
  });
  return {effects,blur,bottomBlur};
 }
@@ -279,7 +285,8 @@ function updateSectionMotion(){
  const lowerBoundary=innerHeight-bottomRange;
  neckEffects.bottomBlur.style.height=bottomRange+'px';neckEffects.bottomBlur.hidden=reduced.matches;
  neckEffects.effects.forEach(effect=>{
-  const {panel,path}=effect,rect=panel.getBoundingClientRect();
+  const {panel,path,surface}=effect,rect=panel.getBoundingClientRect();
+  surface.style.width=(innerWidth+40)+'px';surface.style.height=(innerHeight+40)+'px';surface.style.left=(-rect.left-20)+'px';surface.style.top=(-rect.top-20)+'px';
   panel.style.removeProperty('filter');
   const upper=rect.top<boundary&&rect.bottom>0;
   const lower=rect.bottom>lowerBoundary&&rect.top<innerHeight;

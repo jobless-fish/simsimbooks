@@ -122,3 +122,11 @@ body.show-introduction .bottom-edge-blur{opacity:1}
  .page-section .introduction{backdrop-filter:url("#paper-glass-refraction") blur(1px)}
 }
 @media(prefers-reduced-motion:reduce){.page-section .introduction{-webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}}
+
+/* Render the landscape itself through SVG: does not rely on SVG backdrop support. */
+.page-section .introduction{-webkit-backdrop-filter:none;backdrop-filter:none}
+.card-glass-background{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:-2;pointer-events:none}
+.card-glass-background>svg{position:absolute;max-width:none;filter:none}
+.card-glass-background::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.68)}
+.page-section .introduction::before{z-index:-1}
+@media(prefers-reduced-motion:reduce){.card-glass-background>svg{filter:none}}
