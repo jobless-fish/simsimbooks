@@ -1,12 +1,27 @@
-마지막 사진 섹션 제거
+심심한책방 꽃밭 사이트맵 하단 시안
 
-기존 저장소에 ZIP의 index.html, app.js, style.css를 덮어쓰세요.
-INFO가 마지막 섹션이 됩니다. 책 목록과 행사 관리 기능은 유지됩니다.
-인스타그램 관련 기존 사진 파일과 데이터는 지우지 않아도 화면에 표시되지 않습니다.
-직접 사진 등록 기능과 꽃밭/고양이 사이트맵 하단은 이번 수정에 추가하지 않았습니다.
-Worker 재배포는 필요 없습니다.
+INFO 다음 섹션에 추가했습니다. 상단 메뉴에는 별도 항목을 추가하지 않았습니다.
+곡선형 꽃밭이 천천히 무한 회전하며, 메뉴는 고정되어 있습니다.
+첨부된 Walking Cat.svg의 걷기 동작을 살리고 받침대 제거/크림색/윤곽선 보정을 했습니다.
+고양이에 아주 작은 상하 움직임을 더했습니다.
+화면 밖이나 다른 탭에서는 꽃밭 움직임을 멈추며, 모션 줄이기 설정에서는 정지 고양이를 표시합니다.
 
-git add index.html app.js style.css
-git commit -m "Remove final photo section"
+적용
+ZIP 안의 파일을 기존 저장소 최상위에 덮어쓰고 assets/footer는 기존 assets 안에 합쳐 복사하세요.
+기존 행사 데이터, 책 이미지, 관리자 파일과 Worker는 포함하지 않았습니다.
+Worker 재배포나 새 환경 변수는 필요 없습니다.
+
+git add index.html app.js style.css footer.js assets/footer
+git commit -m "Add curved flower garden sitemap footer"
 git -c core.editor=true pull origin main --no-rebase
 git push origin main
+
+GitHub Pages 배포가 끝나면 INFO 다음으로 스크롤해 확인하세요.
+하단 메뉴는 기존의 부드러운 섹션 이동을 사용합니다.
+Instagram/오시는 길은 별도 탭으로 열리고 책방 관리로도 진입할 수 있습니다.
+
+검증
+걷기 SVG와 꽃밭 SVG 문법, 화면 진입/이탈 및 모션 줄이기 처리 확인.
+기존 휠/터치 한 섹션 잠금, 가로 목록 우선 동작 테스트 통과.
+하단 메뉴 이동과 390px 모바일 폭 배치 확인.
+실제 GitHub 배포는 이 ZIP을 적용한 뒤 진행합니다.
