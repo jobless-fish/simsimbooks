@@ -255,6 +255,13 @@ function prepareNeckEffects(){
  const ns='http://www.w3.org/2000/svg';
  const svg=document.createElementNS(ns,'svg');svg.setAttribute('class','motion-filters');svg.setAttribute('aria-hidden','true');
  const defs=document.createElementNS(ns,'defs');svg.append(defs);document.body.append(svg);
+ // Distort only the backdrop sampled by the translucent panels.
+ const glass=document.createElementNS(ns,'filter');glass.id='paper-glass-refraction';
+ glass.setAttribute('x','-5%');glass.setAttribute('y','-5%');glass.setAttribute('width','110%');glass.setAttribute('height','110%');glass.setAttribute('color-interpolation-filters','sRGB');
+ const grain=document.createElementNS(ns,'feTurbulence');grain.setAttribute('type','fractalNoise');grain.setAttribute('baseFrequency','.075');grain.setAttribute('numOctaves','2');grain.setAttribute('seed','12');grain.setAttribute('result','grain');
+ const refract=document.createElementNS(ns,'feDisplacementMap');refract.setAttribute('in','SourceGraphic');refract.setAttribute('in2','grain');refract.setAttribute('scale','2');refract.setAttribute('xChannelSelector','R');refract.setAttribute('yChannelSelector','G');
+ glass.append(grain,refract);defs.append(glass);
+
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
  const bottomBlur=document.createElement('div');bottomBlur.className='bottom-edge-blur';bottomBlur.setAttribute('aria-hidden','true');document.body.append(bottomBlur);
  const effects=pageSections.map((section,i)=>{
