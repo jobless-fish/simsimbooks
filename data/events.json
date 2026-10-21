@@ -13,19 +13,6 @@
       "createdAt": "2026-10-21T04:46:56.055Z",
       "updatedAt": "2026-10-21T04:46:56.055Z",
       "requestHash": "0sNVeL6Mx3KEMThmdbc8TvGFx2ikqcGJbyD8DYHddXI"
-    },
-    {
-      "id": "07b773e8-7bb0-45ee-b737-e6f31fa3ba39",
-      "title": "테스트 행사를 제목까지 적어봤다.",
-      "startAt": "2026-12-01T05:00:00.000Z",
-      "endAt": "2026-12-01T07:00:00.000Z",
-      "location": "심심한책방",
-      "description": "한줄이 얼만큼일지 모르겠다ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ",
-      "registrationUrl": "",
-      "poster": "assets/events/07b773e8-7bb0-45ee-b737-e6f31fa3ba39.jpg",
-      "createdAt": "2026-10-21T03:32:20.592Z",
-      "updatedAt": "2026-10-21T03:32:20.592Z",
-      "requestHash": "OaeaTw3PQ46tFBRjHnRybpzXHuz5g_Wuw8eRXIPgPNw"
     }
   ]
 }
