@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "events": [
     {
+      "id": "aaa24190-c0e5-4500-868f-5d4ee59fab1c",
+      "title": "테스트 온라인 업로드",
+      "startAt": "2026-10-15T09:45:00.000Z",
+      "endAt": "2026-10-21T07:49:00.000Z",
+      "location": "심심한책방",
+      "description": "어쩌고 저쩌고 \n거시기 저쩌고 \n누가 올까요",
+      "registrationUrl": "https://www.coupang.com/",
+      "poster": "assets/events/aaa24190-c0e5-4500-868f-5d4ee59fab1c.jpg",
+      "createdAt": "2026-10-21T04:46:56.055Z",
+      "updatedAt": "2026-10-21T04:46:56.055Z",
+      "requestHash": "0sNVeL6Mx3KEMThmdbc8TvGFx2ikqcGJbyD8DYHddXI"
+    },
+    {
       "id": "07b773e8-7bb0-45ee-b737-e6f31fa3ba39",
       "title": "테스트 행사를 제목까지 적어봤다.",
       "startAt": "2026-12-01T05:00:00.000Z",
