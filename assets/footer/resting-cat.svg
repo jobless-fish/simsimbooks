@@ -2,12 +2,12 @@
 <style>*{animation:none}</style>
 <g class="cat-lift">
 <g class="cat-tail"><path d="M99 180 C53 173 32 145 41 112 C48 88 72 85 72 64" fill="none" stroke="#ffbc3e" stroke-width="25" stroke-linecap="round"/></g>
-<g class="leg leg-a"><path d="M106 192 Q99 218 105 247 Q107 256 119 256" fill="none" stroke="#ed922e" stroke-width="23" stroke-linecap="round"/></g>
+<g class="leg leg-a"><path d="M106 192 Q99 222 105 259 Q107 268 119 268" fill="none" stroke="#ed922e" stroke-width="23" stroke-linecap="round"/></g>
 <g class="leg leg-c"><path d="M213 193 Q207 223 214 249 Q217 257 228 257" fill="none" stroke="#ed922e" stroke-width="22" stroke-linecap="round"/></g>
 <path d="M88 161 C103 133 154 132 193 147 C223 150 250 168 250 191 C249 214 222 226 172 224 C128 224 87 214 83 192 Q80 176 88 161Z" fill="#ffbc3e"/>
 <path d="M222 158 C249 158 255 184 246 208 Q235 225 214 211 Q202 188 222 158Z" fill="#ffdd89"/>
-<g class="leg leg-b"><path d="M130 195 Q120 223 128 249 Q131 255 139 254" fill="none" stroke="#ffbc3e" stroke-width="25" stroke-linecap="round"/></g>
-<g class="leg leg-d"><path d="M236 192 Q232 222 241 249 Q244 255 252 254" fill="none" stroke="#ffbc3e" stroke-width="24" stroke-linecap="round"/></g>
+<g class="leg leg-b"><path d="M130 195 Q120 227 128 258 Q131 264 139 263" fill="none" stroke="#ffbc3e" stroke-width="25" stroke-linecap="round"/></g>
+<g class="leg leg-d"><path d="M222 202 Q219 225 229 246 Q232 252 240 251" fill="none" stroke="#ffbc3e" stroke-width="24" stroke-linecap="round"/></g>
 <g class="cat-head">
 <path d="M174 111 L178 48 Q179 36 190 43 L218 74 Q237 70 253 75 L281 42 Q290 34 293 49 L299 114 C310 145 286 174 240 175 C197 176 170 157 171 131Z" fill="#ffbc3e"/>
 <path d="M184 93 L187 61 Q188 54 194 59 L208 77Z M263 79 L282 58 Q286 53 287 62 L289 97Z" fill="#ffdd89"/>

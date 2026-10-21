@@ -45,13 +45,38 @@ const flowers=Array.from({length:96},(_,i)=>{
 });
 let cardShift=0,sceneHeight=0,frame=0,startedAt=0,progress=0,initialCardHeight=0,finalCardHeight=0;
 let revealed=false,playing=false;
+let groundTop=0,groundHeight=500,drift=0,ambientFrame=0,ambientLast=0;
 const duration=3000;
+// Sample the actual SVG horizon so paws and plants share the same ground.
+function horizon(x){
+ let target=Math.min(x,1-x)*1440,lo=0,hi=1;
+ const bez=(t,a,b,c,d)=>a*(1-t)**3+3*b*(1-t)**2*t+3*c*(1-t)*t*t+d*t*t*t;
+ for(let i=0;i<20;i++){const t=(lo+hi)/2;if(bez(t,-50,220,430,720)<target)lo=t;else hi=t}
+ return groundTop+bez((lo+hi)/2,110,16,0,0)*groundHeight/500;
+}
+function positionFlowers(){
+ const width=scene.clientWidth,span=width+160;
+ flowers.forEach(({plant,x,depth})=>{
+  const px=((x*span-drift)%span+span)%span-80;
+  plant.style.left=px+'px';
+  plant.style.top=(horizon(clamp(px/width))+depth)+'px';
+ });
+}
+function ambient(now){
+ const dt=ambientLast?Math.min(.05,(now-ambientLast)/1000):0;ambientLast=now;
+ const box=scene.getBoundingClientRect();
+ if(!reduced.matches&&!document.hidden&&box.bottom>0&&box.top<innerHeight){drift+=dt*26;positionFlowers()}
+ if(revealed)ambientFrame=requestAnimationFrame(ambient);
+}
 function layout(){
  const viewport=document.documentElement.clientHeight;
  const compact=innerWidth<=640;
  const books=document.querySelector('#books');
- const reference=books.querySelector('.introduction').getBoundingClientRect();
- const cardTop=reference.top-books.getBoundingClientRect().top;
+ const bookCard=books.querySelector('.introduction'),bookStyle=getComputedStyle(books);
+ // Use layout dimensions, not the intro's transient translate/scale transform.
+ const reference={width:bookCard.offsetWidth,height:bookCard.offsetHeight,left:(scene.clientWidth-bookCard.offsetWidth)/2};
+ const paddingTop=parseFloat(bookStyle.paddingTop),paddingBottom=parseFloat(bookStyle.paddingBottom);
+ const cardTop=paddingTop+Math.max(0,(books.clientHeight-paddingTop-paddingBottom-reference.height)/2);
  card.style.left=reference.left+'px';
  card.style.width=reference.width+'px';
  card.style.height='auto';
@@ -59,26 +84,39 @@ function layout(){
  initialCardHeight=reference.height;
  card.style.height=reference.height+'px';
  const blurBoundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
- cardShift=Math.max(0,cardTop-blurBoundary-18);
+ const originalShift=Math.max(0,cardTop-blurBoundary-18);
+ const preservedGroundTop=cardTop+finalCardHeight-originalShift+46;
+ const finalTop=Math.max(blurBoundary+18,Math.min(cardTop,viewport*.16));
+ cardShift=Math.max(0,cardTop-finalTop);
+ finalCardHeight=Math.min(finalCardHeight,Math.max(280,preservedGroundTop-finalTop-46));
  scene.style.setProperty('--info-card-top',cardTop+'px');
- const groundTop=cardTop+finalCardHeight-cardShift+46;
+ // Leave the tallest blooms below the card and use the former empty lower area.
+ groundTop=preservedGroundTop+(compact?80:Math.min(210,viewport*.16));
  const footerTop=groundTop+(compact?72:92);
  const content=footer.querySelector('.footer-inner');
  scene.style.setProperty('--footer-copy-top',footerTop+'px');
  scene.style.setProperty('--ground-top',groundTop+'px');
- sceneHeight=Math.max(viewport,footerTop+content.offsetHeight+12);
- const height=revealed?sceneHeight:Math.max(viewport,books.offsetHeight);
+ // End immediately after the copyright, keeping it above the lower blur band.
+ sceneHeight=footerTop+content.offsetHeight+4;
+ groundHeight=Math.max(360,sceneHeight-groundTop+100);
+ scene.style.setProperty('--ground-height',groundHeight+'px');
+ // Reserve the ending's height before entry: reveal must never clamp scrollY.
+ const height=Math.max(viewport,books.offsetHeight,sceneHeight);
  scene.style.height=height+'px';
  info.style.height=height+'px';
- flowers.forEach(({plant,x,depth})=>{
-  const edge=Math.pow(Math.abs(x-.5)*2,2)*86;
-  plant.style.top=(groundTop+edge+depth)+'px';
- });
+ positionFlowers();
+ const cat=footer.querySelector('.garden-cat'),catWidth=compact?154:Math.min(290,Math.max(220,innerWidth*.11));
+ const catHeight=catWidth*290/320;
+ cat.style.width=catWidth+'px';cat.style.height=catHeight+'px';
+ const catX=scene.clientWidth*(compact?.035:.045);
+ cat.style.left=catX+'px';
+ cat.style.top=(horizon((catX+catWidth*.62)/scene.clientWidth)-catHeight*.915+14)+'px';
  draw(progress);
 }
 function draw(p){
- const shift=smooth(p/.24)*cardShift;
- card.style.height=(initialCardHeight+(finalCardHeight-initialCardHeight)*smooth(p/.24))+'px';
+ const cardEase=smooth(p/.42);
+ const shift=cardEase*cardShift;
+ card.style.height=(initialCardHeight+(finalCardHeight-initialCardHeight)*cardEase)+'px';
  const rise=smooth((p-.20)/.40);
  scene.style.setProperty('--info-card-shift',(-shift)+'px');
  footer.style.transform=`translateY(${(1-rise)*(sceneHeight+60)}px)`;
@@ -86,6 +124,7 @@ function draw(p){
  footer.inert=p<.65;
  footer.setAttribute('aria-hidden',String(p<.21));
  footer.classList.toggle('garden-moving',rise>.1&&!document.hidden&&!reduced.matches);
+ document.body.classList.toggle('garden-revealed',p>.2);
  flowers.forEach(({plant,delay})=>{
   const t=clamp((p-delay)/.16);
   const bloom=reduced.matches?(p>=delay?1:0):1+2.2*Math.pow(t-1,3)+1.2*Math.pow(t-1,2);
@@ -101,19 +140,19 @@ function tick(now){
 function reveal(){
  if(revealed)return;
  revealed=true;playing=true;scene.dataset.state='playing';layout();
+ ambientLast=0;if(!ambientFrame)ambientFrame=requestAnimationFrame(ambient);
  startedAt=performance.now();
  if(reduced.matches){progress=1;draw(1);playing=false;scene.dataset.state='open'}
  else frame=requestAnimationFrame(tick);
 }
 function reset(){
  cancelAnimationFrame(frame);frame=0;revealed=false;playing=false;progress=0;
+ cancelAnimationFrame(ambientFrame);ambientFrame=0;ambientLast=0;drift=0;
  scene.dataset.state='ready';layout();
 }
 window.simsimGarden={reveal,reset,get revealed(){return revealed},get playing(){return playing}};
-window.addEventListener('scroll',()=>{
- if(revealed&&info.getBoundingClientRect().top>innerHeight*.4)reset();
-},{passive:true});
 window.addEventListener('resize',layout);
+window.addEventListener('simsim:opened',layout);
 document.addEventListener('visibilitychange',()=>draw(progress));
 reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;playing=false;draw(1)}});
 document.fonts.ready.then(layout);

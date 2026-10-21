@@ -143,28 +143,62 @@ body.show-introduction .bottom-edge-blur{opacity:1}
 
 /* BOOKS supplies the starting card geometry; one gesture plays the ending. */
 #info{display:block;position:relative;min-height:0;padding:0;overflow:visible}
-.info-scene{position:relative;height:100svh;overflow:hidden;isolation:isolate}
+.info-scene{position:relative;height:100svh;overflow:hidden;overflow-anchor:none;isolation:isolate}
 #info .info-scene>.introduction{position:absolute;top:var(--info-card-top,15svh);left:10%;width:80%;min-height:0;transform:translateY(var(--info-card-shift,0px));transition:opacity 1.3s;z-index:1}
 #info .sitemap-footer{position:absolute;inset:0;min-height:0;margin:0;padding:0;background:transparent;overflow:visible;visibility:hidden;transform:translateY(110%);will-change:transform;z-index:2}
 .garden-landscape,#garden-flowers{position:absolute;inset:0;pointer-events:none}
-.garden-ground{position:absolute;top:var(--ground-top,55svh);left:0;width:100%;height:calc(100% - var(--ground-top,55svh) + 150px);overflow:visible}
+.garden-ground{position:absolute;top:var(--ground-top,55svh);left:0;width:100%;height:var(--ground-height,500px);overflow:visible}
 .garden-flower{position:absolute;transform:translate(-50%,-100%);opacity:.82}
 .flower-sprout{display:block;width:100%;height:100%;overflow:visible;transform:scale(var(--bloom,0));transform-origin:50% 97%;opacity:var(--bloom-opacity,0)}
 .flower-wind{width:100%;height:100%;transform-origin:50% 97%;animation:flower-wind var(--wind-duration,5s) cubic-bezier(.45,0,.3,1) var(--wind-delay,0s) infinite;animation-play-state:paused;will-change:transform}
 .garden-moving .flower-wind{animation-play-state:running}
 @keyframes flower-wind{0%,100%{transform:rotate(-3deg) skewX(-1deg)}32%{transform:rotate(5deg) skewX(1.8deg)}48%{transform:rotate(3.7deg) skewX(.6deg)}76%{transform:rotate(-4.2deg) skewX(-1.5deg)}88%{transform:rotate(-2.7deg) skewX(-.7deg)}}
-.garden-cat{position:absolute;left:5%;top:calc(var(--ground-top,55svh) - 124px);width:145px;height:158px;overflow:visible}
-#info .footer-inner{position:absolute;top:var(--footer-copy-top,65svh);left:0;right:0;padding:0 9% 30px;gap:20px 9%;z-index:3}
+.garden-cat{position:absolute;overflow:visible}
+.garden-cat img{display:block;width:100%;height:100%}.garden-cat .footer-cat-still{display:none}
+#info .footer-inner{position:absolute;top:var(--footer-copy-top,65svh);left:0;right:0;max-width:none;padding:0 16% 14px;grid-template-columns:1.2fr 1fr .8fr;gap:20px 12%;z-index:3}
+#info .footer-connect{justify-self:end}
+.footer-actions{display:flex;align-items:center;gap:16px}
+.footer-bottom .footer-manage{color:#829077;opacity:.48}
+.footer-bottom .footer-manage:hover{opacity:.85}
 #info .footer-brand h2{font-size:clamp(36px,3.5vw,56px)}
 #info .footer-kicker,#info .footer-label{margin-bottom:10px}
 #info .footer-menu a,#info .footer-connect a{min-height:28px}
 @media(max-width:640px){
  #info .info-scene>.introduction{min-height:0}
- #info .footer-inner{padding:0 8% 25px;gap:18px 10%}
+ #info .footer-inner{padding:0 8% 14px;gap:18px 10%;grid-template-columns:1fr 1fr}
  #info .footer-brand h2{font-size:34px}
- .garden-cat{left:4%;width:105px;height:115px;top:calc(var(--ground-top,55svh) - 83px)}
- .garden-cat .footer-cat-motion,.garden-cat .footer-cat-still{x:510px}
  .garden-flower{opacity:.72}
 }
 @media(prefers-reduced-motion:reduce){.flower-wind{animation:none}}
+@media(prefers-reduced-motion:reduce){.garden-cat .footer-cat-motion{display:none}.garden-cat .footer-cat-still{display:block}}
+
+/* Overlay indicator never takes space away from the page. */
+html,body{scrollbar-width:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;height:0;display:none}
+.site-scroll-rail{position:fixed;right:6px;top:14%;height:72%;width:4px;border-radius:9px;background:rgba(100,100,100,.07);z-index:30;pointer-events:none;opacity:0;transition:opacity .6s}
+body[data-stage=open] .site-scroll-rail{opacity:1}
+.site-scroll-thumb{position:absolute;inset:0 0 auto;height:26px;border-radius:9px;background:rgba(100,100,100,.35);will-change:transform}
+
+/* A compact, seamless row of neighboring spaces; the back shows each name. */
+.neighbors-marquee{grid-column:1/-1;min-width:0;margin:0 5%;padding:10px 0 14px;position:relative;overflow:hidden;isolation:isolate;--neighbor-size:clamp(48px,3.2vw,80px);--neighbor-gap:clamp(30px,4vw,96px);mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,#000 9%,#000 91%,transparent)}
+.neighbors-marquee::before,.neighbors-marquee::after{content:"";position:absolute;inset:0 auto 0 0;width:7%;z-index:2;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.neighbors-marquee::after{left:auto;right:0}
+.neighbors-track{display:flex;width:max-content;animation:neighbors-left 42s linear infinite;will-change:transform}
+.neighbors-group{display:flex;align-items:center;gap:var(--neighbor-gap);padding-right:var(--neighbor-gap)}
+.neighbor-link{display:block;flex:none;width:var(--neighbor-size);height:var(--neighbor-size);perspective:650px;text-decoration:none;outline-offset:5px;border-radius:50%}
+.neighbor-card{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.2,.8,.2,1)}
+.neighbor-link:hover .neighbor-card,.neighbor-link:focus-visible .neighbor-card{transform:rotateY(180deg)}
+.neighbor-face{position:absolute;inset:0;display:grid;place-items:center;border-radius:50%;border:2px solid rgba(255,255,255,.9);backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;background:#e6eccf}
+.neighbor-front img{display:block;width:100%;height:100%;object-fit:cover}
+.neighbor-back{transform:rotateY(180deg);background:rgba(208,223,185,.96);padding:5px}
+.neighbor-back span{font:500 clamp(10px,.65vw,15px)/1.5 Paperlogy,sans-serif;text-align:center;word-break:keep-all;color:#405a3a;-webkit-text-stroke:3px white;paint-order:stroke fill}
+.neighbors-marquee:hover .neighbors-track,.neighbors-marquee:focus-within .neighbors-track{animation-play-state:paused}
+@keyframes neighbors-left{to{transform:translateX(-50%)}}
+#info .footer-bottom{position:absolute;grid-column:auto;grid-row:auto;left:0;right:0;bottom:5px;border:0;margin:0;padding:0 16%;pointer-events:none}
+#info .footer-bottom>span{margin-left:0}
+#info .footer-bottom .footer-actions{pointer-events:auto}
+#info .footer-inner{padding-bottom:4px;row-gap:12px}
+body.garden-revealed .bottom-edge-blur{opacity:0!important}
+@media(max-width:640px){.neighbors-marquee{margin:0 6%;padding-bottom:38px;--neighbor-gap:30px}.neighbor-back span{font-size:10px}#info .footer-bottom{bottom:4px;padding:0 8%}#info .footer-inner{row-gap:14px}}
+@media(prefers-reduced-motion:reduce){.neighbors-track{animation:none}.neighbor-card{transition:none}}
 

@@ -1,4 +1,12 @@
 const body=document.body;
+const scrollRail=document.createElement('div');scrollRail.className='site-scroll-rail';scrollRail.setAttribute('aria-hidden','true');
+const scrollThumb=document.createElement('div');scrollThumb.className='site-scroll-thumb';scrollRail.append(scrollThumb);body.append(scrollRail);
+function updateScrollIndicator(){
+ const total=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+ const size=Math.max(26,scrollRail.clientHeight*innerHeight/document.documentElement.scrollHeight);
+ scrollThumb.style.height=size+'px';
+ scrollThumb.style.transform=`translateY(${Math.max(0,Math.min(1,scrollY/total))*(scrollRail.clientHeight-size)}px)`;
+}
 const enter=document.querySelector('#enter');
 const sway=document.querySelector('.logo-sway');
 const main=document.querySelector('#bookshop');
@@ -37,7 +45,7 @@ enter.addEventListener('click',async()=>{
   body.classList.add('show-introduction');
   main.inert=false;main.removeAttribute('aria-hidden');document.querySelector('.section-nav').inert=false;requestAnimationFrame(()=>updatePill(false));
   await wait(reduced.matches?40:1450);
-  body.dataset.stage='open';enter.disabled=false;
+  body.dataset.stage='open';enter.disabled=false;window.dispatchEvent(new Event('simsim:opened'));
 });
 reduced.addEventListener('change',()=>{clearTimeout(nudgeTimer);sway.classList.remove('nudging');if(!reduced.matches)scheduleNudge()});
 document.addEventListener('visibilitychange',()=>{clearTimeout(nudgeTimer);if(!document.hidden)scheduleNudge()});
@@ -50,6 +58,7 @@ const pageSections=[...document.querySelectorAll('.page-section')];
 let navFrame=0;
 function updatePill(){
  navFrame=0;
+ updateScrollIndicator();
  updateSectionMotion();
  // Use rendered scroll position, never the clicked destination or wheel target.
  const y=window.scrollY;
@@ -101,7 +110,7 @@ function glideTo(y){
  }
  scrollFrame=requestAnimationFrame(tick);
 }
-function snapToSection(index){snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));if(pageSections[snapAnchor].id==='info')window.simsimGarden?.reset();glideTo(sectionStops()[snapAnchor])}
+function snapToSection(index){snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));if(pageSections[snapAnchor].id!=='info'&&window.simsimGarden?.revealed)window.simsimGarden.reset();glideTo(sectionStops()[snapAnchor])}
 function shelfAtSection(){
  const section=pageSections[nearestSection()];if(Math.abs(section.getBoundingClientRect().top)>5)return null;
  if(section.id==='books')return {track:bookTrack,move:moveBooks};
