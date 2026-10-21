@@ -10,13 +10,13 @@ function render(){
  if(!events.length){status.hidden=false;status.textContent='새로운 행사 소식을 준비하고 있어요.';count();return}
  status.hidden=true;
  for(const e of events){
-  const card=node('article','event-card'),visual=node('div','event-poster'),src=posterURL(e.poster,base);
+  const card=node('article','event-card'),visual=node('div','event-poster'),src=posterURL(e.poster,base),frame=node('div','event-poster-frame');visual.append(frame);
   card.setAttribute('aria-label',e.title);
-  if(src){const img=node('img');img.src=src;img.alt=e.title+' 포스터';img.decoding='async';img.loading='lazy';img.draggable=false;img.addEventListener('error',()=>{visual.replaceChildren(node('p','event-image-error','포스터를 불러오지 못했어요.'))},{once:true});visual.append(img)}else visual.append(node('p','event-image-error','포스터 준비 중'));
+  if(src){const img=node('img');img.src=src;img.alt=e.title+' 포스터';img.decoding='async';img.loading='lazy';img.draggable=false;img.addEventListener('error',()=>{frame.replaceChildren(node('p','event-image-error','포스터를 불러오지 못했어요.'))},{once:true});frame.append(img)}else frame.append(node('p','event-image-error','포스터 준비 중'));
   const copy=node('div','event-copy');copy.tabIndex=0;copy.setAttribute('aria-label',e.title+' 행사 안내');copy.append(node('span','event-badge',eventState(e)),node('h3','event-name',e.title));
   const dl=node('dl','event-facts');for(const [label,text] of [['일시',eventDate(e.startAt,e.endAt)],['장소',e.location]])dl.append(node('dt','',label),node('dd','',text));
   copy.append(dl,node('p','event-description',e.description));
-  const href=safeLink(e.registrationUrl);if(href){const a=node('a','event-link','행사 신청하기 ↗');a.href=href;a.target='_blank';a.rel='noopener noreferrer';copy.append(a)}
+  const href=safeLink(e.registrationUrl);if(href){const a=node('a','event-link','행사 신청하기 ↗');a.href=href;a.target='_blank';a.rel='noopener noreferrer';frame.append(a)}
   card.append(visual,copy);content.append(card);
  }
  count();

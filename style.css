@@ -93,3 +93,12 @@ body.show-introduction .logo-line-blur{opacity:1}
 .manage-entry a{display:inline-flex;align-items:center;min-height:44px;padding:10px 0}
 
 .event-track .event-copy{scrollbar-width:none}.event-track .event-copy::-webkit-scrollbar{display:none}.event-copy:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+
+/* Keep the application action on the actual poster, clear of event copy. */
+.event-poster-frame{display:inline-grid;position:relative;max-width:100%;vertical-align:top}
+.event-poster-frame img{width:auto;max-width:100%}
+.event-poster-frame .event-link{position:absolute;z-index:1;left:50%;bottom:12px;transform:translateX(-50%);white-space:nowrap;max-width:calc(100% - 16px);min-height:44px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px #0003;animation:poster-action-cycle 7s linear infinite}
+.event-poster-frame .event-link:hover,.event-poster-frame .event-link:focus-visible{animation:none;opacity:1}
+.event-poster-frame .event-link:focus-visible{outline:3px solid white;outline-offset:3px}
+@keyframes poster-action-cycle{0%,71.428571%{opacity:1}85.714286%{opacity:0}100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.event-poster-frame .event-link{animation:none;opacity:1}}
