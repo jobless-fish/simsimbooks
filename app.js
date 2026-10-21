@@ -126,7 +126,6 @@ window.addEventListener('wheel',e=>{
  wheelAmount+=delta;
  if(Math.abs(wheelAmount)>=12){wheelOwner='section';snapToSection(nearestSection()+Math.sign(wheelAmount))}
 },{passive:false});
-window.addEventListener('simsim:modal-open',stopGlide);
 let sectionTouch=null;
 window.addEventListener('touchstart',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||e.touches.length!==1||editable(e.target)){sectionTouch=null;return}
