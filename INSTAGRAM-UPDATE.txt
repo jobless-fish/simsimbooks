@@ -1,0 +1,41 @@
+심심한책방 인스타그램 섹션 업데이트
+
+INFO 다음에 INSTA 섹션을 추가했습니다.
+연결 계정: https://www.instagram.com/simsimhan_bookshop/
+2026-10-21에 확인한 공개 게시물 12개를 사진 목록으로 넣었습니다.
+새 게시물은 자동 반영되지 않습니다. 현재 공개 목록을 저장한 버전입니다.
+개인 계정 로그인 정보, 쿠키, API 토큰은 사용하거나 포함하지 않았습니다.
+
+적용
+1. ZIP 안 파일과 폴더를 기존 simsimbooks 저장소 최상위에 복사합니다.
+   assets와 data는 기존 폴더에 합쳐 복사하세요. 기존 폴더 전체를 지우지 마세요.
+   data/events.json과 행사 포스터는 ZIP에 포함하지 않아 그대로 유지됩니다.
+2. 기존 저장소의 PowerShell에서 실행합니다.
+
+git add index.html app.js style.css events.js shelf-scroll.js instagram.js instagram-utils.js data/instagram.json assets/instagram
+git commit -m "Add Instagram gallery and in-site post viewer"
+git -c core.editor=true pull origin main --no-rebase
+git push origin main
+
+3. GitHub Pages 배포가 끝난 뒤 새로고침합니다.
+Worker 재배포나 환경 변수 추가는 필요 없습니다.
+
+동작
+- INFO에서 다음 섹션으로 넘기거나 INSTA 메뉴를 누르면 사진 목록이 나옵니다.
+- 휠, 드래그, 터치 스와이프로 가로 이동합니다. 기존 책/행사 목록 동작을 유지합니다.
+- 사진 클릭 시 새 창 대신 사이트 안 팝업에서 공식 Instagram 게시물을 표시합니다.
+- 원문 임베드 안에서 사진 넘기기/글 확인/동영상 재생을 이용합니다.
+- 환경에 따라 Instagram 임베드가 제한되면 '사진만 크게 보기'를 이용할 수 있습니다.
+- 외부 이동은 '인스타그램에서 원문 보기'나 프로필 링크를 직접 눌렀을 때만 합니다.
+- 닫기 또는 Esc로 닫으면 사진 목록 위치가 유지됩니다.
+
+게시물 목록 갱신
+새 게시물을 반영하려면 data/instagram.json의 posts 목록과 assets/instagram 사진을 갱신합니다.
+공식 자동 갱신 연결은 비즈니스/크리에이터 계정과 추가 인증 설정이 필요한 별도 단계입니다.
+Meta 공식 API 안내: https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api
+
+검증
+실제 책방 게시물 이미지 12개 및 사이트 내부 Instagram 사진/본문 임베드 표시 확인.
+사진 대체 보기, Esc 닫기와 포커스 복귀, 휠 가로 이동, 모바일 폭 레이아웃 확인.
+기존 섹션 휠/터치 잠금 및 가로 목록 경계 테스트 통과.
+라이브 GitHub 배포는 아직 하지 않았습니다.
