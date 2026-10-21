@@ -84,3 +84,12 @@ body.show-introduction .logo-line-blur{opacity:1}
 @media(max-width:640px){.events-section{padding:30px 26px}.events-heading{align-items:flex-start;gap:12px}.events-heading p{font-size:12px}.events-controls{gap:7px}.event-card{grid-template-columns:1fr;gap:24px}.event-poster img{max-height:36vh}.event-copy{max-height:none;overflow:visible;padding:0}.event-name{font-size:24px}.event-description{font-size:13px}}
 
 .events-section [hidden]{display:none!important}
+/* Horizontal event shelf; native touch scrolling plus damped wheel/drag motion. */
+.event-track{position:relative;display:flex;gap:28px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;touch-action:auto;-webkit-overflow-scrolling:touch;cursor:grab;padding:5px 0 12px;user-select:none}
+.event-track::-webkit-scrollbar{display:none}.event-track .event-card{flex:0 0 calc(100% - 28px);min-width:0;align-self:start}.event-track img{-webkit-user-drag:none}.event-track.dragging,.event-track.dragging a{cursor:grabbing}.event-track:focus-visible{outline:2px solid var(--blue);outline-offset:6px}
+.events-scroll-guide{display:flex;flex-direction:column;align-items:flex-end;gap:8px;color:#7b7e84;font:11px Paperlogy,sans-serif;line-height:1.7}.events-scroll-guide output{color:var(--blue);font-weight:500}.manage-entry{font:12px Paperlogy,sans-serif;margin-top:28px}.manage-entry a{color:#61718a;text-underline-offset:4px}
+@media(max-width:640px){.event-track{gap:18px}.event-track .event-card{flex-basis:calc(100% - 14px)}.events-heading{flex-wrap:wrap}.events-scroll-guide{align-items:flex-start;flex-direction:row;gap:16px}.event-track .event-copy{max-height:28svh;overflow-y:auto;overscroll-behavior-y:contain;padding-right:8px}.event-track .event-poster img{max-height:24svh}.event-name{margin:14px 0 18px}}
+
+.manage-entry a{display:inline-flex;align-items:center;min-height:44px;padding:10px 0}
+
+.event-track .event-copy{scrollbar-width:none}.event-track .event-copy::-webkit-scrollbar{display:none}.event-copy:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}

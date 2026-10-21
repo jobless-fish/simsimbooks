@@ -103,6 +103,8 @@ function glideTo(y){
 }
 window.addEventListener('wheel',e=>{
  if(body.dataset.stage!=='open'||e.ctrlKey||e.metaKey)return;
+ if(e.defaultPrevented)return;
+ if(!snapBusy&&!scrollFrame&&window.simsimEventWheel?.(e))return;
  if(handleBookWheel(e))return;
  if(reduced.matches||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
  if(e.target.closest('textarea,input,select,[contenteditable=true]'))return;

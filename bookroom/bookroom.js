@@ -2,11 +2,12 @@ import {safeLink,eventDate} from '../event-utils.js';
 const API='https://simsimbooks-api.joblessfish.workers.dev';
 const $=id=>document.getElementById(id);
 const loginForm=$('login-form'),eventForm=$('event-form');
-let token='',expires=0,expiryTimer,posterFile=null,posterURL='',imageTask=null,pending=null,busy=false,loginBusy=false,posted=false,imageVersion=0;
+let token='',expires=0,expiryTimer,posterFile=null,posterURL='',imageTask=null,pending=null,busy=false,loginBusy=false,posted=false,imageVersion=0,deleting=false,recentRevision='',deleteTarget=null;
 class RequestError extends Error{constructor(message,status=0){super(message);this.status=status}}
 function message(id,text,kind=''){const e=$(id);e.textContent=text;e.dataset.kind=kind}
 function freeze(value){$('event-fields').disabled=value;$('publish-button').disabled=busy||posted||!!imageTask;$('publish-button').textContent=busy?'등록 중…':pending?'같은 내용으로 다시 확인':'행사 등록하기'}
 function clearSession(preserve=true){
+ if($('delete-dialog').open)$('delete-dialog').close();deleteTarget=null;
  token='';expires=0;clearTimeout(expiryTimer);$('editor-panel').hidden=true;$('login-panel').hidden=false;$('logout').hidden=true;$('admin-password').value='';
  if(!preserve)resetEvent();
 }
@@ -20,7 +21,7 @@ function signedIn(data){
 async function api(path,{method='GET',body,auth=true}={}){
  const headers={};if(auth){if(!token||expires<=Date.now()){clearSession(true);throw new RequestError('다시 로그인해주세요.',401)}headers.Authorization='Bearer '+token}
  if(body&&!(body instanceof FormData)){headers['Content-Type']='application/json';body=JSON.stringify(body)}
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),method==='POST'?65000:20000);
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),['POST','DELETE'].includes(method)?65000:20000);
  try{
   const response=await fetch(API+path,{method,headers,body,signal:controller.signal,credentials:'omit'});
   let data;try{data=await response.json()}catch{throw new RequestError('서버 응답을 확인하지 못했습니다. 잠시 뒤 다시 시도해주세요.',response.status>=400?response.status:0)}
@@ -36,14 +37,14 @@ loginForm.addEventListener('submit',async e=>{
  catch(error){message('login-status',error.message,'error')}
  finally{$('admin-password').value='';loginBusy=false;$('login-button').disabled=false}
 });
-$('logout').addEventListener('click',()=>{if(busy)return;clearSession(false);message('login-status','로그아웃했습니다.');$('admin-id').focus()});
+$('logout').addEventListener('click',()=>{if(busy||deleting)return;clearSession(false);message('login-status','로그아웃했습니다.');$('admin-id').focus()});
 if(['localhost','127.0.0.1'].includes(location.hostname)||location.protocol==='file:')$('origin-note').hidden=false;
 function updatePreview(){
  $('preview-title').textContent=$('title').value||'행사명이 들어갑니다';
  $('preview-description').textContent=$('description').value||'행사의 이야기가 들어갑니다.';
  $('preview-location').textContent=$('location').value||'장소를 입력해주세요.';
  const start=$('startAt').value,end=$('endAt').value;
- $('preview-date').textContent=start&&end?eventDate(start+':00+09:00',end+':00+09:00'):'일시를 입력해주세요.';
+ $('preview-date').textContent=start?eventDate(start+':00+09:00',end?end+':00+09:00':null):'일시를 입력해주세요.';
  const href=safeLink($('registrationUrl').value.trim());$('preview-link').hidden=!href;if(href)$('preview-link').href=href;else $('preview-link').removeAttribute('href');
 }
 eventForm.addEventListener('input',()=>{updatePreview();$('endAt').min=$('startAt').value});
@@ -83,12 +84,12 @@ function readMetadata(){
  if(!posterFile)throw new Error('포스터를 먼저 선택해주세요.');
  const start=$('startAt').value,end=$('endAt').value;
  const date=value=>{if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value))throw new Error('날짜와 시간을 입력해주세요.');return value+':00+09:00'};
- const startAt=date(start),endAt=date(end);if(Date.parse(endAt)<Date.parse(startAt))throw new Error('종료 일시는 시작 일시 이후로 입력해주세요.');
+ const startAt=date(start),endAt=end?date(end):null;if(endAt&&Date.parse(endAt)<Date.parse(startAt))throw new Error('종료 일시는 시작 일시 이후로 입력해주세요.');
  const registrationUrl=$('registrationUrl').value.trim();if(registrationUrl&&!safeLink(registrationUrl))throw new Error('신청 링크는 https:// 주소로 입력해주세요.');
  return {title:$('title').value.trim(),startAt,endAt,location:$('location').value.trim(),description:$('description').value.trim(),registrationUrl};
 }
 eventForm.addEventListener('submit',async e=>{
- e.preventDefault();if(busy||posted)return;
+ e.preventDefault();if(busy||deleting||posted)return;
  try{
   if(imageTask)await imageTask;
   if(!pending){if(!eventForm.reportValidity())return;pending={id:crypto.randomUUID(),metadata:JSON.stringify(readMetadata()),file:posterFile}}
@@ -111,15 +112,39 @@ function resetEvent(){
 $('new-event').addEventListener('click',()=>{resetEvent();$('title').focus()});
 let recentBusy=false;
 async function loadRecent(){
- if(recentBusy||!token)return;recentBusy=true;$('refresh-events').disabled=true;$('recent-status').textContent='등록한 행사를 불러오고 있어요.';
- try{const data=await api('/events');if(!Array.isArray(data.events))throw new Error('행사 목록을 확인할 수 없습니다.');$('recent-events').replaceChildren();
-  for(const event of data.events){const item=document.createElement('li'),title=document.createElement('strong'),date=document.createElement('span');title.textContent=event.title;date.textContent=eventDate(event.startAt,event.endAt);item.append(title,date);$('recent-events').append(item)}
+ if(recentBusy||deleting||!token)return;recentBusy=true;$('refresh-events').disabled=true;$('recent-status').textContent='등록한 행사를 불러오고 있어요.';
+ try{const data=await api('/events');if(!Array.isArray(data.events))throw new Error('행사 목록을 확인할 수 없습니다.');recentRevision=data.revision;$('recent-events').replaceChildren();
+  for(const event of data.events){const item=document.createElement('li'),title=document.createElement('strong'),date=document.createElement('span');title.textContent=event.title;date.textContent=eventDate(event.startAt,event.endAt);const copy=document.createElement('div'),remove=document.createElement('button');copy.append(title,date);remove.type='button';remove.className='room-danger';remove.textContent='삭제';remove.setAttribute('aria-label',event.title+' 삭제');remove.addEventListener('click',()=>openDelete(event));item.className='recent-row';item.append(copy,remove);$('recent-events').append(item)}
   $('recent-status').textContent=data.events.length?data.events.length+'개의 행사가 등록돼 있어요.':'아직 등록한 행사가 없습니다.';
  }catch(error){$('recent-status').textContent=error.message}finally{recentBusy=false;$('refresh-events').disabled=false}
 }
 $('refresh-events').addEventListener('click',loadRecent);
-document.addEventListener('visibilitychange',async()=>{if(document.hidden||!token||busy)return;try{await api('/session')}catch(error){if(error.status===401)message('login-status','로그인 시간이 끝났습니다. 다시 로그인해주세요.')}});
+document.addEventListener('visibilitychange',async()=>{if(document.hidden||!token||busy||deleting)return;try{await api('/session')}catch(error){if(error.status===401)message('login-status','로그인 시간이 끝났습니다. 다시 로그인해주세요.')}});
 window.addEventListener('beforeunload',e=>{if(!posted&&(pending||$('title').value||$('description').value||posterFile)){e.preventDefault();e.returnValue=''}});
 updatePreview();
 
 $('login-button').disabled=false;
+
+const deleteDialog=$('delete-dialog');
+function openDelete(event){
+ if(busy||deleting)return;
+ deleteTarget={id:event.id,title:event.title,revision:recentRevision};
+ $('delete-title').textContent=event.title;message('delete-dialog-status','');$('delete-confirm').disabled=false;$('delete-cancel').disabled=false;
+ deleteDialog.showModal();$('delete-cancel').focus();
+}
+$('delete-cancel').addEventListener('click',()=>{if(!deleting){deleteDialog.close();deleteTarget=null}});
+deleteDialog.addEventListener('cancel',e=>{if(deleting)e.preventDefault();else deleteTarget=null});
+$('delete-confirm').addEventListener('click',async()=>{
+ if(!deleteTarget||deleting||busy)return;
+ deleting=true;$('delete-confirm').disabled=true;$('delete-cancel').disabled=true;$('logout').disabled=true;$('publish-button').disabled=true;$('refresh-events').disabled=true;message('delete-dialog-status','행사 목록에서 삭제하고 있어요.');
+ try{
+  await api('/events/'+encodeURIComponent(deleteTarget.id),{method:'DELETE',body:{revision:deleteTarget.revision}});
+  message('delete-status','행사를 삭제했습니다. GitHub Pages 배포 후 공개 화면에서도 사라집니다.','success');deleteDialog.close();deleteTarget=null;
+ }catch(error){
+  message('delete-dialog-status',error.message+(!error.status||error.status>=500?' 다시 삭제를 누르면 같은 행사의 처리 결과를 확인합니다.':''),'error');
+  if([401,409].includes(error.status)){deleteDialog.close();message('delete-status',error.message,'error');deleteTarget=null}
+ }finally{
+  deleting=false;$('delete-confirm').disabled=false;$('delete-cancel').disabled=false;$('logout').disabled=false;freeze(!!pending||posted);$('refresh-events').disabled=false;
+  if(!deleteDialog.open)loadRecent();
+ }
+});

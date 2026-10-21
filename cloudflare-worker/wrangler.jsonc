@@ -1,0 +1,17 @@
+{
+  "name": "simsimbooks-api",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-21",
+  "workers_dev": true,
+  "keep_vars": true,
+  "ratelimits": [
+    {
+      "name": "LOGIN_LIMITER",
+      "namespace_id": "68101",
+      "simple": {
+        "limit": 5,
+        "period": 60
+      }
+    }
+  ]
+}
