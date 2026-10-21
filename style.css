@@ -140,3 +140,15 @@ body.show-introduction .bottom-edge-blur{opacity:1}
 @media(max-width:640px){.footer-inner{padding:clamp(300px,42svh,360px) 8% 20px;grid-template-columns:1fr 1fr;gap:18px 10%}.footer-brand{grid-column:1/-1}.footer-kicker{font-size:9px;margin-bottom:8px}.footer-brand h2{font-size:34px;line-height:1.1}.footer-brand h2 br{display:none}.footer-note{font-size:10px;margin:8px 0 0}.footer-label{font-size:9px;margin-bottom:10px}.footer-menu,.footer-connect{padding:0}.footer-menu a,.footer-connect a{font-size:10px;min-height:25px}.footer-bottom{padding-top:10px;font-size:9px}.footer-bottom a{min-height:24px}.footer-cat-motion,.footer-cat-still{x:635px}.footer-inner a{touch-action:manipulation}}
 @media(prefers-reduced-motion:reduce){.footer-cat-hop{animation:none}.footer-cat-motion{display:none}.footer-cat-still{display:block}}
 @media(max-width:640px) and (max-height:700px){.footer-inner{padding-top:clamp(250px,42svh,300px)}}
+
+/* INFO and the garden share one continuous, transparent ending. */
+#info{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(120px,15svh,170px) 0 0;gap:0}
+#info>.introduction{flex:none;width:80%;min-height:clamp(360px,46svh,530px)}
+#info>.sitemap-footer{flex:none;width:100%;min-height:max(720px,85svh);margin-top:-80px;background:transparent}
+#info .footer-inner{padding-top:clamp(330px,44svh,420px);padding-bottom:70px}
+@media(max-width:640px){
+ #info{padding-top:170px}
+ #info>.introduction{width:84%;min-height:0}
+ #info>.sitemap-footer{min-height:760px;margin-top:-35px}
+ #info .footer-inner{padding-top:320px;padding-bottom:40px}
+}

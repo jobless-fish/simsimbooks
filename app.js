@@ -111,6 +111,12 @@ function shelfAtSection(){
 function shelfCanMove(shelf,delta){return shelf&&shelf.track.scrollWidth>shelf.track.clientWidth+1&&(delta>0?shelf.track.scrollLeft<shelf.track.scrollWidth-shelf.track.clientWidth-2:shelf.track.scrollLeft>2)}
 function editable(target){return target.closest('textarea,input,select,[contenteditable=true]')}
 function copyCanScroll(target,delta){const copy=target.closest('.event-copy');return copy&&(delta>0?copy.scrollTop+copy.clientHeight<copy.scrollHeight-2:copy.scrollTop>1)}
+// After reaching INFO, allow continuous scrolling through its garden.
+const infoSection=document.querySelector('#info');
+function inInfoFlow(delta=0){
+ const top=infoSection.getBoundingClientRect().top;
+ return top < -2 || (top <= 2 && delta >= 0);
+}
 let wheelLast=-Infinity,wheelOwner=null,wheelAmount=0;
 window.addEventListener('wheel',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||editable(e.target))return;
@@ -118,6 +124,7 @@ window.addEventListener('wheel',e=>{
  if(fresh){wheelOwner=null;wheelAmount=0}
  const delta=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?18:e.deltaMode===2?innerHeight:1);
  if(!delta)return;
+ if(!snapBusy&&inInfoFlow(delta)){wheelOwner=null;wheelAmount=0;return}
  if(!wheelOwner&&copyCanScroll(e.target,delta))return;
  e.preventDefault();
  if(snapBusy||wheelOwner==='section'){wheelOwner='section';return}
@@ -138,6 +145,7 @@ window.addEventListener('touchmove',e=>{
  if(!g.owner){
   if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
   if(Math.abs(dx)>Math.abs(dy)){g.owner='native';return}
+  if(!snapBusy&&inInfoFlow(dy)){g.owner='native';return}
   if(copyCanScroll(g.target,dy)){g.owner='native';return}
   g.owner=shelfCanMove(g.shelf,dy)?'shelf':'pending';
  }
@@ -150,11 +158,12 @@ window.addEventListener('keydown',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||editable(e.target)||e.target.closest('button,a')||e.defaultPrevented)return;
  const direction=['ArrowDown','PageDown',' '].includes(e.key)?1:['ArrowUp','PageUp'].includes(e.key)?-1:0;
  if(!direction&&!['Home','End'].includes(e.key))return;
+ if(!snapBusy&&e.key!=='Home'&&(e.key==='End'||inInfoFlow(direction)))return;
  e.preventDefault();if(e.repeat||snapBusy)return;
  const shelf=shelfAtSection();if(direction&&shelfCanMove(shelf,direction)){shelf.move(direction*shelf.track.clientWidth*.8);return}
  snapToSection(e.key==='Home'?0:e.key==='End'?pageSections.length-1:nearestSection()+direction);
 });
-window.addEventListener('resize',()=>{if(body.dataset.stage==='open')snapToSection(nearestSection())});
+window.addEventListener('resize',()=>{if(body.dataset.stage==='open'&&!inInfoFlow())snapToSection(nearestSection())});
 reduced.addEventListener('change',()=>{if(snapBusy){stopGlide();window.scrollTo(0,scrollTarget)}});
 
 const bookTrack=document.querySelector('.book-track');
