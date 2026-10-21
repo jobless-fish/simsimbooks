@@ -28,10 +28,6 @@ async function load(){
  catch{status.hidden=false;status.textContent='행사 소식을 불러오지 못했어요. 잠시 뒤 다시 확인해주세요.';retry.hidden=false}
  finally{clearTimeout(timer)}
 }
-window.simsimEventWheel=e=>Math.abs(section.getBoundingClientRect().top)<=4?shelf.wheel(e):false;
+window.simsimEventShelf={track:content,move:shelf.move};
 retry.addEventListener('click',load);load();
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.code==='KeyE'&&!e.repeat){e.preventDefault();location.assign(new URL('bookroom/',base))}});
-content.addEventListener('wheel',e=>{
- const box=e.target.closest('.event-copy');if(!box||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
- const can=e.deltaY>0?box.scrollTop+box.clientHeight<box.scrollHeight-2:box.scrollTop>1;if(can)e.stopPropagation();
-},{passive:true});

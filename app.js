@@ -81,77 +81,81 @@ new ResizeObserver(queuePill).observe(sectionNav);
 new ResizeObserver(queuePill).observe(main);
 document.fonts.ready.then(queuePill);
 
-// Damped scrolling for wheels and section links; touch and keyboard remain native.
-let scrollFrame=0,scrollTarget=0,lastScrollTime=0;
+// One section per gesture burst; horizontal shelves own their whole burst.
+let scrollFrame=0,scrollTarget=0,snapAnchor=0,snapBusy=false;
 const clampScroll=y=>Math.max(0,Math.min(y,document.documentElement.scrollHeight-innerHeight));
-function stopGlide(){cancelAnimationFrame(scrollFrame);scrollFrame=0;scrollTarget=scrollY}
+const sectionStops=()=>pageSections.map(s=>s.getBoundingClientRect().top+scrollY);
+function nearestSection(){const stops=sectionStops();return stops.reduce((best,y,i)=>Math.abs(y-scrollY)<Math.abs(stops[best]-scrollY)?i:best,0)}
+function stopGlide(){cancelAnimationFrame(scrollFrame);scrollFrame=0;snapBusy=false}
 function glideTo(y){
- scrollTarget=clampScroll(y);
- if(reduced.matches){stopGlide();window.scrollTo(0,clampScroll(y));return}
- if(scrollFrame)return;
- lastScrollTime=performance.now();
- let scrollPosition=scrollY;
+ stopGlide();scrollTarget=clampScroll(y);snapBusy=true;
+ if(reduced.matches){window.scrollTo(0,scrollTarget);snapBusy=false;return}
+ let position=scrollY,velocity=0,last=performance.now();
  function tick(now){
-  const dt=Math.min(40,now-lastScrollTime);lastScrollTime=now;
+  const dt=Math.min(.05,(now-last)/1000);last=now;
   scrollTarget=clampScroll(scrollTarget);
-  scrollPosition+=(scrollTarget-scrollPosition)*(1-Math.exp(-dt/115));
-  const next=scrollPosition;
-  if(Math.abs(scrollTarget-scrollPosition)<.8){window.scrollTo(0,scrollTarget);scrollFrame=0;releaseSnap();return}
-  window.scrollTo(0,next);scrollFrame=requestAnimationFrame(tick);
+  const x=position-scrollTarget,omega=12,c=velocity+omega*x,decay=Math.exp(-omega*dt);
+  position=scrollTarget+(x+c*dt)*decay;velocity=(velocity-omega*c*dt)*decay;
+  if(Math.abs(position-scrollTarget)<.3&&Math.abs(velocity)<3){window.scrollTo(0,scrollTarget);scrollFrame=0;snapBusy=false;return}
+  window.scrollTo(0,position);scrollFrame=requestAnimationFrame(tick);
  }
  scrollFrame=requestAnimationFrame(tick);
 }
+function snapToSection(index){snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));glideTo(sectionStops()[snapAnchor])}
+function shelfAtSection(){
+ const section=pageSections[nearestSection()];if(Math.abs(section.getBoundingClientRect().top)>5)return null;
+ if(section.id==='books')return {track:bookTrack,move:moveBooks};
+ if(section.id==='events')return window.simsimEventShelf||null;
+ return null;
+}
+function shelfCanMove(shelf,delta){return shelf&&shelf.track.scrollWidth>shelf.track.clientWidth+1&&(delta>0?shelf.track.scrollLeft<shelf.track.scrollWidth-shelf.track.clientWidth-2:shelf.track.scrollLeft>2)}
+function editable(target){return target.closest('textarea,input,select,[contenteditable=true]')}
+function copyCanScroll(target,delta){const copy=target.closest('.event-copy');return copy&&(delta>0?copy.scrollTop+copy.clientHeight<copy.scrollHeight-2:copy.scrollTop>1)}
+let wheelLast=-Infinity,wheelOwner=null,wheelAmount=0;
 window.addEventListener('wheel',e=>{
- if(body.dataset.stage!=='open'||e.ctrlKey||e.metaKey)return;
- if(e.defaultPrevented)return;
- if(!snapBusy&&!scrollFrame&&window.simsimEventWheel?.(e))return;
- if(handleBookWheel(e))return;
- if(reduced.matches||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
- if(e.target.closest('textarea,input,select,[contenteditable=true]'))return;
- const delta=e.deltaY*(e.deltaMode===1?18:e.deltaMode===2?innerHeight:1);
- e.preventDefault();if(snapBusy&&scrollFrame)return;if(snapBusy)cancelSnap();glideTo((scrollFrame?scrollTarget:scrollY)+delta);
+ if(body.dataset.stage!=='open'||e.ctrlKey||e.metaKey||editable(e.target))return;
+ const now=performance.now(),fresh=now-wheelLast>320;wheelLast=now;
+ if(fresh){wheelOwner=null;wheelAmount=0}
+ const delta=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?18:e.deltaMode===2?innerHeight:1);
+ if(!delta)return;
+ if(!wheelOwner&&copyCanScroll(e.target,delta))return;
+ e.preventDefault();
+ if(snapBusy||wheelOwner==='section'){wheelOwner='section';return}
+ if(!wheelOwner){const shelf=shelfAtSection();wheelOwner=shelfCanMove(shelf,delta)?shelf:'pending'}
+ if(typeof wheelOwner==='object'){wheelOwner.move(delta);return}
+ wheelAmount+=delta;
+ if(Math.abs(wheelAmount)>=12){wheelOwner='section';snapToSection(nearestSection()+Math.sign(wheelAmount))}
 },{passive:false});
-window.addEventListener('touchstart',stopGlide,{passive:true});
-window.addEventListener('pointerdown',e=>{if(!e.target.closest('.section-nav'))stopGlide()},{passive:true});
-window.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key))stopGlide()});
-reduced.addEventListener('change',stopGlide);
-window.addEventListener('resize',stopGlide);
-
-// Commit a section transition only once 60% of the travel has been rendered.
-let snapAnchor=0,snapBusy=false,snapReleaseTimer=0,touchScrolling=false;
-const sectionStops=()=>pageSections.map(s=>s.getBoundingClientRect().top+scrollY);
-function releaseSnap(){
- if(!snapBusy||scrollFrame)return;
- clearTimeout(snapReleaseTimer);
- snapReleaseTimer=setTimeout(()=>{snapBusy=false},220);
-}
-function snapToSection(index){
- clearTimeout(snapReleaseTimer);
- snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));
- snapBusy=true;
- glideTo(sectionStops()[snapAnchor]);
- releaseSnap();
-}
-function checkSectionSnap(){
- if(body.dataset.stage!=='open'||snapBusy||touchScrolling)return;
- const stops=sectionStops(),y=scrollY;
- if(snapAnchor<stops.length-1&&y>=stops[snapAnchor]+.6*(stops[snapAnchor+1]-stops[snapAnchor])){snapToSection(snapAnchor+1);return}
- if(snapAnchor>0&&y<=stops[snapAnchor]-.6*(stops[snapAnchor]-stops[snapAnchor-1]))snapToSection(snapAnchor-1);
-}
-function cancelSnap(){
- clearTimeout(snapReleaseTimer);const wasBusy=snapBusy;snapBusy=false;
- if(!wasBusy)return;
- const stops=sectionStops();
- snapAnchor=stops.reduce((best,y,i)=>Math.abs(y-scrollY)<Math.abs(stops[best]-scrollY)?i:best,0);
-}
-window.addEventListener('scroll',checkSectionSnap,{passive:true});
-window.addEventListener('touchstart',()=>{touchScrolling=true;cancelSnap()},{passive:true});
-window.addEventListener('touchend',()=>{touchScrolling=false;checkSectionSnap()},{passive:true});
-window.addEventListener('touchcancel',()=>{touchScrolling=false;cancelSnap()},{passive:true});
-window.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key))cancelSnap()});
-window.addEventListener('pointerdown',e=>{if(!e.target.closest('.section-nav'))cancelSnap()},{passive:true});
-window.addEventListener('resize',cancelSnap);
-
+let sectionTouch=null;
+window.addEventListener('touchstart',e=>{
+ if(body.dataset.stage!=='open'||e.touches.length!==1||editable(e.target)){sectionTouch=null;return}
+ const t=e.touches[0];sectionTouch={x:t.clientX,y:t.clientY,lastY:t.clientY,owner:snapBusy?'section':null,shelf:shelfAtSection(),target:e.target};
+},{passive:true,capture:true});
+window.addEventListener('touchmove',e=>{
+ const g=sectionTouch;if(!g||e.touches.length!==1)return;
+ const t=e.touches[0],dx=g.x-t.clientX,dy=g.y-t.clientY,step=g.lastY-t.clientY;g.lastY=t.clientY;
+ if(g.owner==='native')return;
+ if(!g.owner){
+  if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
+  if(Math.abs(dx)>Math.abs(dy)){g.owner='native';return}
+  if(copyCanScroll(g.target,dy)){g.owner='native';return}
+  g.owner=shelfCanMove(g.shelf,dy)?'shelf':'pending';
+ }
+ if(e.cancelable)e.preventDefault();
+ if(g.owner==='shelf'){g.shelf.move(step);return}
+ if(g.owner==='pending'&&Math.abs(dy)>=36){g.owner='section';snapToSection(nearestSection()+Math.sign(dy))}
+},{passive:false,capture:true});
+for(const name of ['touchend','touchcancel'])window.addEventListener(name,()=>{sectionTouch=null},{passive:true});
+window.addEventListener('keydown',e=>{
+ if(body.dataset.stage!=='open'||editable(e.target)||e.target.closest('button,a')||e.defaultPrevented)return;
+ const direction=['ArrowDown','PageDown',' '].includes(e.key)?1:['ArrowUp','PageUp'].includes(e.key)?-1:0;
+ if(!direction&&!['Home','End'].includes(e.key))return;
+ e.preventDefault();if(e.repeat||snapBusy)return;
+ const shelf=shelfAtSection();if(direction&&shelfCanMove(shelf,direction)){shelf.move(direction*shelf.track.clientWidth*.8);return}
+ snapToSection(e.key==='Home'?0:e.key==='End'?pageSections.length-1:nearestSection()+direction);
+});
+window.addEventListener('resize',()=>{if(body.dataset.stage==='open')snapToSection(nearestSection())});
+reduced.addEventListener('change',()=>{if(snapBusy){stopGlide();window.scrollTo(0,scrollTarget)}});
 
 const bookTrack=document.querySelector('.book-track');
 const booksSection=document.querySelector('#books');
@@ -175,14 +179,6 @@ function moveBooks(delta){
   bookFrame=requestAnimationFrame(tick);
  }
  bookFrame=requestAnimationFrame(tick);
-}
-function handleBookWheel(e){
- if(Math.abs(booksSection.getBoundingClientRect().top)>4||snapBusy||scrollFrame)return false;
- const delta=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?18:e.deltaMode===2?innerWidth:1);
- if(!delta||bookMax()<1)return false;
- const x=bookTrack.scrollLeft,outward=delta>0?x>=bookMax()-1:x<=1;
- if(outward&&!bookFrame&&performance.now()-lastBookInput>180)return false;
- e.preventDefault();lastBookInput=performance.now();moveBooks(delta);return true;
 }
 bookTrack.addEventListener('keydown',e=>{
  if(['ArrowRight','ArrowLeft','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();moveBooks((e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1)*(bookTrack.querySelector('.book-cover').clientWidth+28))}
