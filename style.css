@@ -107,3 +107,7 @@ body.show-introduction .logo-line-blur{opacity:1}
 .bottom-edge-blur{position:fixed;bottom:0;left:0;right:0;z-index:9;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);mask-image:linear-gradient(to top,#000 0%,#000 calc(100% - 16px),transparent 100%);opacity:0}
 body.show-introduction .bottom-edge-blur{opacity:1}
 .bottom-edge-blur[hidden]{display:none}
+
+/* A restrained white halo gives the glass panels a little depth. */
+.page-section .introduction{box-shadow:0 0 0 1px rgba(255,255,255,.22),0 8px 26px -12px rgba(255,255,255,.30)}
+.bottom-edge-blur{mask-image:linear-gradient(to top,#000 0%,transparent 100%);-webkit-mask-image:linear-gradient(to top,#000 0%,transparent 100%)}

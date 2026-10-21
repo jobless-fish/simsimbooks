@@ -268,8 +268,9 @@ function updateSectionMotion(){
  if(!neckEffects)neckEffects=prepareNeckEffects();
  const boundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
  neckEffects.blur.style.height=boundary+'px';neckEffects.blur.hidden=reduced.matches;
- const lowerBoundary=innerHeight-boundary;
- neckEffects.bottomBlur.style.height=boundary+'px';neckEffects.bottomBlur.hidden=reduced.matches;
+ const bottomRange=boundary*.4;
+ const lowerBoundary=innerHeight-bottomRange;
+ neckEffects.bottomBlur.style.height=bottomRange+'px';neckEffects.bottomBlur.hidden=reduced.matches;
  neckEffects.effects.forEach(effect=>{
   const {panel,path}=effect,rect=panel.getBoundingClientRect();
   panel.style.removeProperty('filter');
@@ -280,7 +281,7 @@ function updateSectionMotion(){
   }
   const edgeInset=distance=>{const p=Math.max(0,Math.min(1,distance/120));return .025*p*p*(3-2*p)};
   const topInset=upper?edgeInset(boundary-rect.top):0;
-  const bottomInset=lower?edgeInset(rect.bottom-lowerBoundary):0;
+  const bottomInset=0; // Keep the lower card silhouette intact; blur provides the exit effect.
   // Each edge narrows by at most 2.5%; the middle and content keep their size.
   path.setAttribute('d',`M ${topInset} 0 H ${1-topInset} C ${1-topInset} .06 1 .10 1 .18 V .82 C 1 .90 ${1-bottomInset} .94 ${1-bottomInset} 1 H ${bottomInset} C ${bottomInset} .94 0 .90 0 .82 V .18 C 0 .10 ${topInset} .06 ${topInset} 0 Z`);
   panel.style.clipPath='url(#'+effect.id+')';effect.active=true;
