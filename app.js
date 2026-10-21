@@ -101,7 +101,7 @@ function glideTo(y){
  }
  scrollFrame=requestAnimationFrame(tick);
 }
-function snapToSection(index){snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));glideTo(sectionStops()[snapAnchor])}
+function snapToSection(index){snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));if(pageSections[snapAnchor].id==='info')window.simsimGarden?.reset();glideTo(sectionStops()[snapAnchor])}
 function shelfAtSection(){
  const section=pageSections[nearestSection()];if(Math.abs(section.getBoundingClientRect().top)>5)return null;
  if(section.id==='books')return {track:bookTrack,move:moveBooks};
@@ -117,6 +117,13 @@ function inInfoFlow(delta=0){
  const top=infoSection.getBoundingClientRect().top;
  return top < -2 || (top <= 2 && delta >= 0);
 }
+function gardenGesture(delta){
+ const garden=window.simsimGarden;
+ if(!garden||!inInfoFlow(delta))return false;
+ if(garden.playing)return true;
+ if(delta>0&&!garden.revealed){garden.reveal();return true}
+ return false;
+}
 let wheelLast=-Infinity,wheelOwner=null,wheelAmount=0;
 window.addEventListener('wheel',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||editable(e.target))return;
@@ -124,7 +131,11 @@ window.addEventListener('wheel',e=>{
  if(fresh){wheelOwner=null;wheelAmount=0}
  const delta=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?18:e.deltaMode===2?innerHeight:1);
  if(!delta)return;
- if(!snapBusy&&inInfoFlow(delta)){wheelOwner=null;wheelAmount=0;return}
+ if(!snapBusy&&inInfoFlow(delta)){
+  // The gesture that arrived at INFO must end before the reveal is armed.
+  if(wheelOwner==='section'){e.preventDefault();return}
+  if(gardenGesture(delta))e.preventDefault();wheelOwner=null;wheelAmount=0;return;
+ }
  if(!wheelOwner&&copyCanScroll(e.target,delta))return;
  e.preventDefault();
  if(snapBusy||wheelOwner==='section'){wheelOwner='section';return}
@@ -141,11 +152,12 @@ window.addEventListener('touchstart',e=>{
 window.addEventListener('touchmove',e=>{
  const g=sectionTouch;if(!g||e.touches.length!==1)return;
  const t=e.touches[0],dx=g.x-t.clientX,dy=g.y-t.clientY,step=g.lastY-t.clientY;g.lastY=t.clientY;
+ if(g.owner==='garden'){if(e.cancelable)e.preventDefault();return}
  if(g.owner==='native')return;
  if(!g.owner){
   if(Math.max(Math.abs(dx),Math.abs(dy))<10)return;
   if(Math.abs(dx)>Math.abs(dy)){g.owner='native';return}
-  if(!snapBusy&&inInfoFlow(dy)){g.owner='native';return}
+  if(!snapBusy&&inInfoFlow(dy)){if(gardenGesture(dy)){g.owner='garden';if(e.cancelable)e.preventDefault();return}g.owner='native';return}
   if(copyCanScroll(g.target,dy)){g.owner='native';return}
   g.owner=shelfCanMove(g.shelf,dy)?'shelf':'pending';
  }
@@ -155,9 +167,13 @@ window.addEventListener('touchmove',e=>{
 },{passive:false,capture:true});
 for(const name of ['touchend','touchcancel'])window.addEventListener(name,()=>{sectionTouch=null},{passive:true});
 window.addEventListener('keydown',e=>{
- if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||editable(e.target)||e.target.closest('button,a')||e.defaultPrevented)return;
+ if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||editable(e.target)||(e.key===' '&&e.target.closest('button,a'))||e.defaultPrevented)return;
  const direction=['ArrowDown','PageDown',' '].includes(e.key)?1:['ArrowUp','PageUp'].includes(e.key)?-1:0;
  if(!direction&&!['Home','End'].includes(e.key))return;
+ if(e.repeat&&inInfoFlow(direction)){e.preventDefault();return}
+ if(!snapBusy&&inInfoFlow(direction)&&(direction>0||e.key==='End')){
+  if(gardenGesture(1)){e.preventDefault();return}
+ }
  if(!snapBusy&&e.key!=='Home'&&(e.key==='End'||inInfoFlow(direction)))return;
  e.preventDefault();if(e.repeat||snapBusy)return;
  const shelf=shelfAtSection();if(direction&&shelfCanMove(shelf,direction)){shelf.move(direction*shelf.track.clientWidth*.8);return}
@@ -262,7 +278,7 @@ function prepareNeckEffects(){
  const defs=document.createElementNS(ns,'defs');svg.append(defs);document.body.append(svg);
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
  const bottomBlur=document.createElement('div');bottomBlur.className='bottom-edge-blur';bottomBlur.setAttribute('aria-hidden','true');document.body.append(bottomBlur);
- const effects=pageSections.filter(section=>section.querySelector('.introduction')).map((section,i)=>{
+ const effects=pageSections.filter(section=>section.id!=='info'&&section.querySelector('.introduction')).map((section,i)=>{
   const clip=document.createElementNS(ns,'clipPath');clip.id='section-edge-'+i;clip.setAttribute('clipPathUnits','objectBoundingBox');
   const path=document.createElementNS(ns,'path');clip.append(path);defs.append(clip);
   return {panel:section.querySelector('.introduction'),path,id:clip.id,active:false};

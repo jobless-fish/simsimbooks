@@ -35,36 +35,50 @@ const flowers=Array.from({length:96},(_,i)=>{
  plant.style.height=(height+28)+'px';
  plant.style.color=colors[Math.floor(random()*colors.length)];
  plant.style.opacity=horizon?'.9':'.42';
+ plant.style.setProperty('--wind-duration',(3.8+random()*2.6)+'s');
+ plant.style.setProperty('--wind-delay',(-random()*6)+'s');
  plant.innerHTML=`<svg viewBox="-30 -145 60 150" aria-hidden="true" class="flower-sprout"><g transform="rotate(${lean} 0 0)"><path d="M0 0 Q-8 -${height*.48} 0 -${height}" stroke="#799261" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M-2 -20 Q-22 -39 -18 -47 Q0 -42 -2 -20 M-2 -34 Q18 -55 20 -46 Q16 -32 -2 -34" fill="#96af78"/><g transform="translate(0 -${height})">${head(kind)}</g></g></svg>`;
+ const wind=document.createElement('div');wind.className='flower-wind';
+ wind.append(plant.firstElementChild);plant.append(wind);
  flowerBed.append(plant);
  return {plant,x,depth,delay:.44+random()*.38};
 });
-let travel=1,cardShift=0,sceneHeight=0,frame=0;
+let cardShift=0,sceneHeight=0,frame=0,startedAt=0,progress=0,initialCardHeight=0,finalCardHeight=0;
+let revealed=false,playing=false;
+const duration=3000;
 function layout(){
  const viewport=document.documentElement.clientHeight;
  const compact=innerWidth<=640;
- const cardTop=compact?164:Math.max(116,viewport*.15);
- cardShift=Math.min(78,viewport*.085);
+ const books=document.querySelector('#books');
+ const reference=books.querySelector('.introduction').getBoundingClientRect();
+ const cardTop=reference.top-books.getBoundingClientRect().top;
+ card.style.left=reference.left+'px';
+ card.style.width=reference.width+'px';
+ card.style.height='auto';
+ finalCardHeight=Math.min(reference.height,card.offsetHeight);
+ initialCardHeight=reference.height;
+ card.style.height=reference.height+'px';
+ const blurBoundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
+ cardShift=Math.max(0,cardTop-blurBoundary-18);
  scene.style.setProperty('--info-card-top',cardTop+'px');
- const groundTop=cardTop+card.offsetHeight-cardShift+46;
+ const groundTop=cardTop+finalCardHeight-cardShift+46;
  const footerTop=groundTop+(compact?72:92);
  const content=footer.querySelector('.footer-inner');
  scene.style.setProperty('--footer-copy-top',footerTop+'px');
  scene.style.setProperty('--ground-top',groundTop+'px');
- sceneHeight=Math.max(viewport,footerTop+content.offsetHeight+36);
- scene.style.height=sceneHeight+'px';
- travel=Math.max(650,viewport*1.25);
- info.style.height=(sceneHeight+travel)+'px';
+ sceneHeight=Math.max(viewport,footerTop+content.offsetHeight+12);
+ const height=revealed?sceneHeight:Math.max(viewport,books.offsetHeight);
+ scene.style.height=height+'px';
+ info.style.height=height+'px';
  flowers.forEach(({plant,x,depth})=>{
   const edge=Math.pow(Math.abs(x-.5)*2,2)*86;
   plant.style.top=(groundTop+edge+depth)+'px';
  });
- draw();
+ draw(progress);
 }
-function draw(){
- frame=0;
- const p=clamp(-info.getBoundingClientRect().top/travel);
+function draw(p){
  const shift=smooth(p/.24)*cardShift;
+ card.style.height=(initialCardHeight+(finalCardHeight-initialCardHeight)*smooth(p/.24))+'px';
  const rise=smooth((p-.20)/.40);
  scene.style.setProperty('--info-card-shift',(-shift)+'px');
  footer.style.transform=`translateY(${(1-rise)*(sceneHeight+60)}px)`;
@@ -73,17 +87,37 @@ function draw(){
  footer.setAttribute('aria-hidden',String(p<.21));
  footer.classList.toggle('garden-moving',rise>.1&&!document.hidden&&!reduced.matches);
  flowers.forEach(({plant,delay})=>{
-  const bloom=reduced.matches?(p>=delay?1:0):smooth((p-delay)/.15);
-  plant.style.setProperty('--bloom',bloom);
+  const t=clamp((p-delay)/.16);
+  const bloom=reduced.matches?(p>=delay?1:0):1+2.2*Math.pow(t-1,3)+1.2*Math.pow(t-1,2);
+  plant.style.setProperty('--bloom',Math.max(0,bloom));
+  plant.style.setProperty('--bloom-opacity',clamp(t*2));
  });
 }
-function queue(){if(!frame)frame=requestAnimationFrame(draw)}
-window.addEventListener('scroll',queue,{passive:true});
+function tick(now){
+ progress=clamp((now-startedAt)/duration);draw(progress);
+ if(progress<1)frame=requestAnimationFrame(tick);
+ else{frame=0;playing=false;scene.dataset.state='open'}
+}
+function reveal(){
+ if(revealed)return;
+ revealed=true;playing=true;scene.dataset.state='playing';layout();
+ startedAt=performance.now();
+ if(reduced.matches){progress=1;draw(1);playing=false;scene.dataset.state='open'}
+ else frame=requestAnimationFrame(tick);
+}
+function reset(){
+ cancelAnimationFrame(frame);frame=0;revealed=false;playing=false;progress=0;
+ scene.dataset.state='ready';layout();
+}
+window.simsimGarden={reveal,reset,get revealed(){return revealed},get playing(){return playing}};
+window.addEventListener('scroll',()=>{
+ if(revealed&&info.getBoundingClientRect().top>innerHeight*.4)reset();
+},{passive:true});
 window.addEventListener('resize',layout);
-document.addEventListener('visibilitychange',queue);
-reduced.addEventListener('change',queue);
+document.addEventListener('visibilitychange',()=>draw(progress));
+reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;playing=false;draw(1)}});
 document.fonts.ready.then(layout);
-new ResizeObserver(layout).observe(card);
+new ResizeObserver(layout).observe(document.querySelector('#books .introduction'));
 layout();
 footer.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
  const destination=link.getAttribute('href');
