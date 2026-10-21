@@ -256,27 +256,33 @@ function prepareNeckEffects(){
  const svg=document.createElementNS(ns,'svg');svg.setAttribute('class','motion-filters');svg.setAttribute('aria-hidden','true');
  const defs=document.createElementNS(ns,'defs');svg.append(defs);document.body.append(svg);
  const blur=document.createElement('div');blur.className='logo-line-blur';blur.setAttribute('aria-hidden','true');document.body.append(blur);
+ const bottomBlur=document.createElement('div');bottomBlur.className='bottom-edge-blur';bottomBlur.setAttribute('aria-hidden','true');document.body.append(bottomBlur);
  const effects=pageSections.map((section,i)=>{
   const clip=document.createElementNS(ns,'clipPath');clip.id='section-edge-'+i;clip.setAttribute('clipPathUnits','objectBoundingBox');
   const path=document.createElementNS(ns,'path');clip.append(path);defs.append(clip);
   return {panel:section.querySelector('.introduction'),path,id:clip.id,active:false};
  });
- return {effects,blur};
+ return {effects,blur,bottomBlur};
 }
 function updateSectionMotion(){
  if(!neckEffects)neckEffects=prepareNeckEffects();
  const boundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
  neckEffects.blur.style.height=boundary+'px';neckEffects.blur.hidden=reduced.matches;
+ const lowerBoundary=innerHeight-boundary;
+ neckEffects.bottomBlur.style.height=boundary+'px';neckEffects.bottomBlur.hidden=reduced.matches;
  neckEffects.effects.forEach(effect=>{
   const {panel,path}=effect,rect=panel.getBoundingClientRect();
   panel.style.removeProperty('filter');
-  if(reduced.matches||rect.top>=boundary||rect.bottom<=0){
+  const upper=rect.top<boundary&&rect.bottom>0;
+  const lower=rect.bottom>lowerBoundary&&rect.top<innerHeight;
+  if(reduced.matches||(!upper&&!lower)){
    if(effect.active){panel.style.clipPath='';effect.active=false}return;
   }
-  const progress=Math.min(1,(boundary-rect.top)/120);
-  const inset=.025*progress*progress*(3-2*progress);
-  // At most 2.5% per side, confined to the upper 18% of the panel.
-  path.setAttribute('d',`M ${inset} 0 H ${1-inset} C ${1-inset} .06 1 .10 1 .18 V 1 H 0 V .18 C 0 .10 ${inset} .06 ${inset} 0 Z`);
+  const edgeInset=distance=>{const p=Math.max(0,Math.min(1,distance/120));return .025*p*p*(3-2*p)};
+  const topInset=upper?edgeInset(boundary-rect.top):0;
+  const bottomInset=lower?edgeInset(rect.bottom-lowerBoundary):0;
+  // Each edge narrows by at most 2.5%; the middle and content keep their size.
+  path.setAttribute('d',`M ${topInset} 0 H ${1-topInset} C ${1-topInset} .06 1 .10 1 .18 V .82 C 1 .90 ${1-bottomInset} .94 ${1-bottomInset} 1 H ${bottomInset} C ${bottomInset} .94 0 .90 0 .82 V .18 C 0 .10 ${topInset} .06 ${topInset} 0 Z`);
   panel.style.clipPath='url(#'+effect.id+')';effect.active=true;
  });
 }

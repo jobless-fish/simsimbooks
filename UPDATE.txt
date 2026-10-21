@@ -1,0 +1,13 @@
+행사 신청 버튼 위치/모션 업데이트
+
+기존 v2 적용 후 이 ZIP의 events.js, style.css를 저장소 최상위에 덮어쓰세요.
+Worker 재배포는 필요 없습니다.
+
+git add events.js style.css
+git commit -m "Overlay event action on poster with fade cycle"
+git -c core.editor=true pull origin main --no-rebase
+git push origin main
+
+버튼: 포스터 하단 중앙에 겹쳐 표시. 5초 표시, 1초 페이드아웃, 1초 페이드인 반복.
+마우스나 키보드로 버튼을 선택하는 동안 계속 표시됩니다.
+기기의 모션 줄이기 설정에서는 계속 표시됩니다.

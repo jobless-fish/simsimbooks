@@ -1,0 +1,23 @@
+﻿행사 API v2 추가 명세
+
+기본 주소: https://simsimbooks-api.joblessfish.workers.dev
+기존 로그인/세션/행사 조회/등록 API 유지. Bearer 토큰은 메모리에만 보관.
+
+POST /events
+metadata.endAt은 null, 빈 문자열 또는 생략 가능.
+startAt은 기존처럼 시간대가 있는 ISO 날짜 필수.
+종료를 입력한 경우 시작보다 빠를 수 없음.
+새 파일에는 종료 미입력 시 endAt:null 저장.
+
+DELETE /events/<행사 UUID v4>
+Headers: Authorization: Bearer <token>, Content-Type: application/json
+Body: {"revision":"GET /events에서 받은 revision"}
+성공: {ok:true,deleted:true,id,commit,message}
+이미 제거된 경우: {ok:true,deleted:false,id,commit,message}
+401: 재로그인 / 403: 출처 확인 / 409: 목록을 새로 받고 재확인 / 429: 잠시 후 재시도.
+목록 전체를 한 커밋으로 교체하고 force:false로 브랜치를 갱신함.
+포스터 파일을 삭제하지 않으므로 복구를 위한 Git 이력과 이미지가 유지됨.
+기존 행사 데이터의 다른 항목과 사이트 파일은 보존함.
+
+GET /health
+version:events-2, eventDeleteReady:true, optionalEndAt:true 추가.

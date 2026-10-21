@@ -102,3 +102,8 @@ body.show-introduction .logo-line-blur{opacity:1}
 .event-poster-frame .event-link:focus-visible{outline:3px solid white;outline-offset:3px}
 @keyframes poster-action-cycle{0%,71.428571%{opacity:1}85.714286%{opacity:0}100%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.event-poster-frame .event-link{animation:none;opacity:1}}
+
+/* Mirror the subtle logo-line blur at the lower viewport edge. */
+.bottom-edge-blur{position:fixed;bottom:0;left:0;right:0;z-index:9;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);mask-image:linear-gradient(to top,#000 0%,#000 calc(100% - 16px),transparent 100%);opacity:0}
+body.show-introduction .bottom-edge-blur{opacity:1}
+.bottom-edge-blur[hidden]{display:none}

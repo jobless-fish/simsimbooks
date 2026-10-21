@@ -1,0 +1,52 @@
+﻿심심한책방 행사 관리 업데이트 v2
+
+변경 내용
+- 관리자 등록 행사 목록에 삭제 버튼과 확인창 추가.
+- 종료 일시 선택사항. 시작 일시만으로 등록 가능.
+- 종료가 없으면 시작일 한국 시각 23:59:59.999까지 진행 중, 다음 날부터 지난 행사.
+- EVENTS 화살표 제거. 휠을 내리면 가로 이동, 스프링 관성 적용.
+- 마우스 드래그와 터치 기기의 기본 가로 스와이프/관성 지원.
+- INFO 안의 책방 관리 링크로 모바일/태블릿에서도 로그인 화면 진입.
+- PC 단축키 Ctrl+Shift+E 유지.
+
+적용 순서 (PowerShell)
+1. 기존 simsimbooks 저장소 폴더에서 최신 원격 데이터를 받습니다.
+git -c core.editor=true pull origin main --no-rebase
+오류/충돌이 있으면 먼저 해결합니다.
+
+2. 이 ZIP을 저장소 최상위에 덮어씁니다.
+행사 데이터(data/)와 포스터(assets/)는 ZIP에 넣지 않았으므로 기존 파일이 유지됩니다.
+
+3. Worker를 먼저 배포합니다.
+cd cloudflare-worker
+npx wrangler deploy --keep-vars
+cd ..
+
+확인 주소:
+https://simsimbooks-api.joblessfish.workers.dev/health?check=events2
+version: events-2 / loginReady: true / eventDeleteReady: true / optionalEndAt: true 확인.
+기존 Secrets와 일반 변수는 유지합니다. 새 비밀번호나 토큰 설정은 필요하지 않습니다.
+
+4. 홈페이지 화면 파일과 Worker 소스를 GitHub에 올립니다.
+git add index.html app.js style.css events.js event-utils.js shelf-scroll.js bookroom cloudflare-worker/worker.mjs cloudflare-worker/wrangler.jsonc
+git commit -m "Add event deletion, optional end time and elastic event scrolling"
+git -c core.editor=true pull origin main --no-rebase
+git push origin main
+
+5. GitHub Pages 배포 후 새로고침합니다.
+모바일 관리 화면: https://jobless-fish.github.io/simsimbooks/bookroom/
+INFO > 책방 관리 링크로 이동해도 됩니다.
+기기에 따라 공유 또는 브라우저 메뉴의 홈 화면에 추가 기능으로 바로가기를 만들 수 있습니다.
+
+삭제 동작
+삭제는 공개 행사 목록에서 제거하는 것입니다. 포스터 원본과 Git 기록은 보관합니다.
+삭제 전 목록을 읽은 시점과 현재 저장소가 다르면 409로 거절하고 새 목록을 요청합니다.
+한번 삭제된 같은 행사를 재요청하면 성공으로 처리해 중복 요청에 안전합니다.
+삭제 후 홈페이지 반영에는 GitHub Pages 배포 시간이 필요합니다.
+
+검증 범위
+실제 GitHub 테스트 행사 두 건의 표시, 휠 가로 이동과 드래그, INFO 링크 이동 확인.
+테스트 서버에서 종료 미입력 등록, 삭제 취소와 삭제 성공 확인.
+서버 모의 테스트로 미인증/잘못된 출처/잘못된 목록 버전/동시 저장/반복 삭제/요청 제한 확인.
+실제 GitHub 행사 삭제나 새 행사 등록은 이 작업 중 실행하지 않았습니다.
+실제 계정 연결은 사용자 배포 후 확인합니다.
