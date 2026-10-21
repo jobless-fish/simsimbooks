@@ -116,17 +116,5 @@ body.show-introduction .bottom-edge-blur{opacity:1}
 .page-section .introduction{position:relative;isolation:isolate}
 .page-section .introduction::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22180%22%20height%3D%22180%22%3E%3Cfilter%20id%3D%22n%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.85%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23n%29%22%20opacity%3D%22.6%22%2F%3E%3C%2Fsvg%3E");background-repeat:repeat;background-size:180px 180px;opacity:.065;mix-blend-mode:multiply}
 
-/* Static, low-amplitude frosted-glass refraction; text and posters stay sharp. */
-.page-section .introduction{-webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
-@supports (backdrop-filter:url("#paper-glass-refraction")){
- .page-section .introduction{backdrop-filter:url("#paper-glass-refraction") blur(1px)}
-}
-@media(prefers-reduced-motion:reduce){.page-section .introduction{-webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}}
-
-/* Render the landscape itself through SVG: does not rely on SVG backdrop support. */
-.page-section .introduction{-webkit-backdrop-filter:none;backdrop-filter:none}
-.card-glass-background{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:-2;pointer-events:none}
-.card-glass-background>svg{position:absolute;max-width:none;filter:none}
-.card-glass-background::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.68)}
-.page-section .introduction::before{z-index:-1}
-@media(prefers-reduced-motion:reduce){.card-glass-background>svg{filter:none}}
+/* Slightly more transparent glass, without backdrop distortion. */
+.page-section .introduction{background:rgba(255,255,255,.71);-webkit-backdrop-filter:none;backdrop-filter:none}
