@@ -55,7 +55,7 @@ body.show-introduction .section-nav{opacity:1;visibility:visible}.section-nav a{
 .book-title{display:block;text-align:left;font-family:Paperlogy,sans-serif;font-weight:500;font-size:14px;line-height:1.6;margin-top:14px;padding-left:1px}
 @media(max-width:640px){.book-title{font-size:13px;margin-top:12px}}
 
-.book-track{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.book-track{cursor:grab;touch-action:auto;-webkit-overflow-scrolling:touch;user-select:none;-webkit-user-select:none}
 .book-track .book-cover,.book-track img{ -webkit-user-drag:none}
 .book-track.dragging,.book-track.dragging .book-cover{cursor:grabbing}
 .book-track.dragging .book-cover{transform:none;transition:none}
@@ -73,3 +73,5 @@ body.show-introduction .logo-line-blur{opacity:1}
 @media(max-width:1000px){#about .title-side{max-width:300px;margin-left:-12px}#about h1{font-size:clamp(48px,6.3vw,63px)}#about .sunglass-cat{width:230px;margin-top:24px}}
 @media(max-width:760px){#about .title-side{max-width:330px;margin-left:0}#about h1{font-size:clamp(48px,10vw,70px)}#about .sunglass-cat{width:240px;margin-top:20px}}
 @media(max-width:400px){#about h1{font-size:clamp(40px,12vw,48px)}#about .sunglass-cat{width:200px}}
+
+@media(hover:none){.book-cover:hover{transform:none}}

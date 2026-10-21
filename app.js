@@ -185,7 +185,7 @@ function handleBookWheel(e){
 bookTrack.addEventListener('keydown',e=>{
  if(['ArrowRight','ArrowLeft','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();moveBooks((e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1)*(bookTrack.querySelector('.book-cover').clientWidth+28))}
 });
-bookTrack.addEventListener('touchstart',stopBooks,{passive:true});
+bookTrack.addEventListener('touchstart',()=>{stopBooks();suppressBookClick=false},{passive:true});
 bookTrack.addEventListener('pointerdown',stopBooks,{passive:true});
 bookTrack.addEventListener('focusin',()=>{if(!bookFrame)bookTarget=bookTrack.scrollLeft});
 new ResizeObserver(()=>{stopBooks();bookTrack.scrollLeft=clampBook(bookTrack.scrollLeft)}).observe(bookTrack);
@@ -195,16 +195,16 @@ reduced.addEventListener('change',stopBooks);
 let bookDrag=null,suppressBookClick=false;
 bookTrack.addEventListener('dragstart',e=>e.preventDefault());
 bookTrack.addEventListener('pointerdown',e=>{
- if(!e.isPrimary||e.button!==0)return;
+ // Let the browser own touch scrolling and its iPad momentum.
+ if(e.pointerType==='touch'||!e.isPrimary||e.button!==0)return;
  stopBooks();suppressBookClick=false;
  bookDrag={id:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,time:performance.now(),startScroll:bookTrack.scrollLeft,velocity:0,active:false};
 });
 bookTrack.addEventListener('pointermove',e=>{
  const d=bookDrag;if(!d||e.pointerId!==d.id)return;
- const dx=e.clientX-d.startX,dy=e.clientY-d.startY;
+ const dx=e.clientX-d.startX;
  if(!d.active){
   if(Math.abs(dx)<6)return;
-  if(e.pointerType==='touch'&&Math.abs(dy)>Math.abs(dx)){bookDrag=null;return}
   d.active=true;suppressBookClick=true;bookTrack.setPointerCapture(d.id);bookTrack.classList.add('dragging');
  }
  e.preventDefault();
@@ -225,6 +225,24 @@ function finishBookDrag(e){
 bookTrack.addEventListener('pointerup',finishBookDrag);
 bookTrack.addEventListener('pointercancel',finishBookDrag);
 bookTrack.addEventListener('lostpointercapture',finishBookDrag);
+// Keep a swipe from opening the product link when the finger lifts.
+let bookTouch=null;
+bookTrack.addEventListener('touchstart',e=>{
+ const touch=e.touches[0];
+ bookTouch=e.touches.length===1?{x:touch.clientX,y:touch.clientY,scroll:bookTrack.scrollLeft}:null;
+},{passive:true});
+bookTrack.addEventListener('touchmove',e=>{
+ if(!bookTouch)return;
+ const touch=e.touches[0];
+ if(e.touches.length!==1){bookTouch=null;return}
+ if(Math.hypot(touch.clientX-bookTouch.x,touch.clientY-bookTouch.y)>8)suppressBookClick=true;
+},{passive:true});
+function finishBookTouch(){
+ if(bookTouch&&Math.abs(bookTrack.scrollLeft-bookTouch.scroll)>4)suppressBookClick=true;
+ bookTouch=null;
+}
+bookTrack.addEventListener('touchend',finishBookTouch,{passive:true});
+bookTrack.addEventListener('touchcancel',finishBookTouch,{passive:true});
 bookTrack.addEventListener('click',e=>{if(suppressBookClick){e.preventDefault();e.stopPropagation();suppressBookClick=false}},true);
 
 
