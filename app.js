@@ -126,7 +126,7 @@ function shelfAtSection(){
 }
 function shelfCanMove(shelf,delta){return shelf&&shelf.track.scrollWidth>shelf.track.clientWidth+1&&(delta>0?shelf.track.scrollLeft<shelf.track.scrollWidth-shelf.track.clientWidth-2:shelf.track.scrollLeft>2)}
 function editable(target){return target.closest('textarea,input,select,[contenteditable=true]')}
-function copyCanScroll(target,delta){const copy=target.closest('.event-copy');return copy&&(delta>0?copy.scrollTop+copy.clientHeight<copy.scrollHeight-2:copy.scrollTop>1)}
+function copyCanScroll(target,delta){const copy=target.closest('.event-copy');return copy&&copy.scrollHeight>copy.clientHeight+1}
 // After reaching INFO, allow continuous scrolling through its garden.
 const infoSection=document.querySelector('#info');
 function inInfoFlow(delta=0){

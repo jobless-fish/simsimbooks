@@ -65,9 +65,9 @@ async function draw(slide){
  const loaded=await data.ready;if(token!==epoch)return;if(!loaded){data.host.textContent='프로필 그림을 불러오지 못했어요.';written(slide);return;}
  if(reduced.matches){data.lines.style.opacity='0';data.fill.removeAttribute('mask');data.host.dataset.drawPhase='complete';written(slide);return}
  try{
-  await animate(data.brushes[0],[{strokeDashoffset:data.lengths[0]},{strokeDashoffset:0}],{duration:1700,easing:'linear',fill:'forwards'}).finished;
+  await animate(data.brushes[0],[{strokeDashoffset:data.lengths[0]},{strokeDashoffset:0}],{duration:850,easing:'linear',fill:'forwards'}).finished;
   if(token!==epoch)return;data.host.dataset.drawPhase='fill';
-  await animate(data.brushes[1],[{strokeDashoffset:data.lengths[1]},{strokeDashoffset:0}],{duration:1900,easing:'linear',fill:'forwards'}).finished;
+  await animate(data.brushes[1],[{strokeDashoffset:data.lengths[1]},{strokeDashoffset:0}],{duration:950,easing:'linear',fill:'forwards'}).finished;
   if(token!==epoch)return;
   data.fill.removeAttribute('mask');data.lines.style.opacity='0';data.host.dataset.drawPhase='complete';written(slide);
  }catch{/* Leaving a portrait cancels its current drawing. */}
