@@ -24,15 +24,16 @@ function head(kind){
  }
 }
 // Jittered, seeded positions keep the meadow irregular without changing on resize.
-const flowers=Array.from({length:96},(_,i)=>{
- const horizon=i<36;
- const x=horizon?(i+random())/36:random();
+const mobileGarden=matchMedia('(max-width:640px)').matches,flowerCount=mobileGarden?48:96,horizonCount=mobileGarden?24:36;
+const flowers=Array.from({length:flowerCount},(_,i)=>{
+ const horizon=i<horizonCount;
+ const x=horizon?(i+random())/horizonCount:random();
  const depth=horizon?4+random()*27:60+random()*330;
  const height=50+random()*61;
  const kind=Math.floor(random()*7);
  const lean=-12+random()*24;
  const plant=document.createElement('div');plant.className='garden-flower';
- plant.style.left=(x*100)+'%';
+ plant.style.left='0';plant.style.top='0';
  const width=44+random()*22;plant.style.width=width+'px';
  plant.style.height=(height+28)+'px';
  plant.style.color=colors[Math.floor(random()*colors.length)];
@@ -56,19 +57,22 @@ function horizon(x){
  for(let i=0;i<20;i++){const t=(lo+hi)/2;if(bez(t,-50,220,430,720)<target)lo=t;else hi=t}
  return groundTop+bez((lo+hi)/2,110,16,0,0)*groundHeight/500;
 }
+let horizonSamples=[];
+function cacheHorizon(){horizonSamples=Array.from({length:257},(_,i)=>horizon(i/256))}
+function cachedHorizon(x){const value=clamp(x)*256,i=Math.min(255,Math.floor(value));return horizonSamples[i]+(horizonSamples[i+1]-horizonSamples[i])*(value-i)}
 function positionFlowers(){
  const width=scene.clientWidth,span=width+160*density;
  flowers.forEach(({plant,x,depth})=>{
   const px=((x*span-drift)%span+span)%span-80*density;
-  plant.style.left=px+'px';
-  plant.style.top=(horizon(clamp(px/width))+depth*density)+'px';
+  plant.style.transform=`translate3d(${px}px,${cachedHorizon(px/width)+depth*density}px,0) translate(-50%,-100%)`;
  });
 }
+let gardenVisible=false,neighborsVisible=false;
 function ambient(now){
+ ambientFrame=0;
  const dt=ambientLast?Math.min(.05,(now-ambientLast)/1000):0;ambientLast=now;
- const box=scene.getBoundingClientRect();
- if(!reduced.matches&&!document.hidden&&box.bottom>0&&box.top<innerHeight){drift+=dt*26*density;positionFlowers()}
- if(revealed)ambientFrame=requestAnimationFrame(ambient);
+ if(!reduced.matches&&!document.hidden&&gardenVisible){drift+=dt*26*density;positionFlowers()}
+ if(revealed&&gardenVisible&&!document.hidden&&!reduced.matches)ambientFrame=requestAnimationFrame(ambient);
 }
 function layout(){
  density=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-density'))||1;
@@ -110,7 +114,7 @@ function layout(){
  const height=Math.max(viewport,books.offsetHeight,sceneHeight);
  scene.style.height=height+'px';
  info.style.height=height+'px';
- positionFlowers();
+ cacheHorizon();positionFlowers();
  const cat=footer.querySelector('.garden-cat'),catWidth=compact?154:Math.min(290*density,Math.max(220*density,innerWidth*.11));
  const catHeight=catWidth*290/320;
  cat.style.width=catWidth+'px';cat.style.height=catHeight+'px';
@@ -129,7 +133,7 @@ function draw(p){
  footer.style.visibility=p>.20?'visible':'hidden';
  footer.inert=p<.65;
  footer.setAttribute('aria-hidden',String(p<.21));
- footer.classList.toggle('garden-moving',rise>.1&&!document.hidden&&!reduced.matches);
+ footer.classList.toggle('garden-moving',rise>.1&&gardenVisible&&!document.hidden&&!reduced.matches);
  document.body.classList.toggle('garden-revealed',p>.2);
  flowers.forEach(({plant,delay})=>{
   const t=clamp((p-delay)/.16);
@@ -138,7 +142,7 @@ function draw(p){
   plant.style.setProperty('--bloom-opacity',clamp(t*2));
  });
 }
-function finishReveal(){frame=0;playing=false;scene.dataset.state='open';window.dispatchEvent(new Event('simsim:garden-open'))}
+function finishReveal(){frame=0;playing=false;syncActivity();scene.dataset.state='open';window.dispatchEvent(new Event('simsim:garden-open'))}
 function tick(now){
  progress=clamp((now-startedAt)/duration);draw(progress);
  if(progress<1)frame=requestAnimationFrame(tick);
@@ -147,7 +151,7 @@ function tick(now){
 function reveal(){
  if(revealed)return;
  revealed=true;playing=true;scene.dataset.state='playing';layout();
- ambientLast=0;if(!ambientFrame)ambientFrame=requestAnimationFrame(ambient);
+ ambientLast=0;syncActivity();
  startedAt=performance.now();
  if(reduced.matches){progress=1;draw(1);finishReveal()}
  else frame=requestAnimationFrame(tick);
@@ -161,7 +165,7 @@ window.simsimGarden={reveal,reset,get revealed(){return revealed},get playing(){
 window.addEventListener('resize',layout);
 window.addEventListener('simsim:layout',layout);
 window.addEventListener('simsim:opened',layout);
-document.addEventListener('visibilitychange',()=>draw(progress));
+document.addEventListener('visibilitychange',()=>{draw(progress);syncActivity()});
 reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;draw(1);finishReveal()}});
 document.fonts.ready.then(layout);
 const footerObserver=new ResizeObserver(layout);
@@ -184,17 +188,16 @@ neighborMarquee.tabIndex=0;
 function paintNeighbors(){neighborTrack.style.transform=`translate3d(${wrapMarquee(neighborMotion.position,neighborSpan)}px,0,0)`}
 function neighborTick(now){
  neighborFrame=0;const dt=neighborLast?Math.min(.05,(now-neighborLast)/1000):0;neighborLast=now;
- const box=neighborMarquee.getBoundingClientRect();
- if(!document.hidden&&box.bottom>0&&box.top<innerHeight&&!footer.inert){
+ if(!document.hidden&&neighborsVisible&&!footer.inert){
   const keyboardFocus=neighborMarquee.matches(':focus-visible')||!!neighborMarquee.querySelector(':focus-visible');
   const wanted=(neighborHovered||keyboardFocus) ? 0.1 : 1;
   neighborRate+=(wanted-neighborRate)*(1-Math.exp(-7*dt));
   neighborMotion.step(dt,-neighborSpan/42*neighborRate);paintNeighbors();
  }
- if(!reduced.matches)neighborFrame=requestAnimationFrame(neighborTick);
+ if(!reduced.matches&&neighborsVisible&&!document.hidden&&!footer.inert)neighborFrame=requestAnimationFrame(neighborTick);
 }
 function measureNeighbors(){neighborSpan=neighborGroup.getBoundingClientRect().width;paintNeighbors()}
-function startNeighbors(){if(!reduced.matches&&!neighborFrame){neighborLast=0;neighborFrame=requestAnimationFrame(neighborTick)}}
+function startNeighbors(){if(!reduced.matches&&!neighborFrame&&neighborsVisible&&!document.hidden&&!footer.inert){neighborLast=0;neighborFrame=requestAnimationFrame(neighborTick)}}
 neighborMarquee.addEventListener('pointerenter',event=>{neighborHovered=event.pointerType!=='touch'});
 neighborMarquee.addEventListener('pointerleave',()=>{neighborHovered=false});
 neighborMarquee.addEventListener('pointerdown',event=>{
@@ -235,4 +238,14 @@ neighborMarquee.addEventListener('keydown',event=>{
 });
 new ResizeObserver(measureNeighbors).observe(neighborGroup);
 reduced.addEventListener('change',()=>{cancelAnimationFrame(neighborFrame);neighborFrame=0;neighborMotion.release();neighborMotion.settle();paintNeighbors();startNeighbors()});
-measureNeighbors();startNeighbors();
+function syncActivity(){
+ const active=gardenVisible&&revealed&&!document.hidden&&!reduced.matches;
+ footer.classList.toggle('garden-moving',active&&progress>.24);
+ if(active&&!ambientFrame){ambientLast=0;ambientFrame=requestAnimationFrame(ambient)}
+ if(!active){cancelAnimationFrame(ambientFrame);ambientFrame=0;ambientLast=0}
+ if(!neighborsVisible||document.hidden||footer.inert){cancelAnimationFrame(neighborFrame);neighborFrame=0;neighborLast=0}else startNeighbors();
+}
+new IntersectionObserver(entries=>{gardenVisible=entries[0].isIntersecting;syncActivity()}).observe(footer);
+new IntersectionObserver(entries=>{neighborsVisible=entries[0].isIntersecting;syncActivity()}).observe(neighborMarquee);
+reduced.addEventListener('change',syncActivity);
+measureNeighbors();syncActivity();

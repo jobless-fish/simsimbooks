@@ -13,43 +13,23 @@ function brushRoute(offset=0){
   d+=(i===0?'M':' L')+start+' '+y+' C '+(start+(end-start)*.3)+' '+(y-2+offset)+' '+(start+(end-start)*.7)+' '+(y+2)+' '+end+' '+(y+1);
  }return d;
 }
-function keyWhite(filter){
- filter.append(svgNode('feColorMatrix',{type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -1 -1 -1 0 3',result:'key'}));
- const transfer=svgNode('feComponentTransfer',{in:'key',result:'keyed'});transfer.append(svgNode('feFuncA',{type:'linear',slope:'1.12',intercept:'-.06'}));filter.append(transfer,svgNode('feComposite',{in:'SourceGraphic',in2:'keyed',operator:'in',result:'ink'}));
-}
 function createPortrait(name){
  const host=stage.querySelector(`[data-portrait="${name}"]`),svg=svgNode('svg',{viewBox:'0 0 600 600','aria-hidden':'true',focusable:'false'}),defs=svgNode('defs');
- const filterAttrs={x:'0%',y:'0%',width:'100%',height:'100%','color-interpolation-filters':'sRGB'};
- const ink=svgNode('filter',{...filterAttrs,id:`ink-${name}`});keyWhite(ink);
- const first=svgNode('filter',{...filterAttrs,id:`first-${name}`});
- if(name==='hye'){
-  // Select her actual blue strokes; no added pencil or monochrome layer.
-  first.append(svgNode('feColorMatrix',{type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -4 0 4 0 -.45',result:'blue'}));
-  first.append(svgNode('feComposite',{in:'SourceGraphic',in2:'blue',operator:'in'}));
- }else{
-  // Keep the actual outer contour and original hair colours first.
-  keyWhite(first);
-  first.append(svgNode('feMorphology',{in:'ink',operator:'erode',radius:'3',result:'inside'}),svgNode('feComposite',{in:'ink',in2:'inside',operator:'out',result:'contour'}));
-  first.append(svgNode('feColorMatrix',{in:'SourceGraphic',type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -4 0 4 0 1.2',result:'hairColour'}));
-  first.append(svgNode('feComposite',{in:'ink',in2:'hairColour',operator:'in',result:'hair'}));
-  const merge=svgNode('feMerge');merge.append(svgNode('feMergeNode',{in:'contour'}),svgNode('feMergeNode',{in:'hair'}));first.append(merge);
- }
- defs.append(ink,first);
  const brushes=[];
  for(const phase of ['line','fill']){
   const mask=svgNode('mask',{id:`${phase}-${name}`,maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:600,'mask-type':'alpha'});
   const brush=svgNode('path',{d:brushRoute(phase==='fill'?2:0),fill:'none',stroke:'white','stroke-width':20,'stroke-linecap':'round','stroke-linejoin':'round'});mask.append(brush);defs.append(mask);brushes.push(brush);
  }
  const clip=svgNode('clipPath',{id:`head-${name}`});clip.append(svgNode('rect',{x:0,y:0,width:600,height:510}));defs.append(clip);svg.append(defs);
- const url=new URL(`assets/people/${name}.svg`,import.meta.url).href;
- const outline=svgNode('image',{href:url,width:600,height:600,filter:`url(#first-${name})`});if(name==='hong')outline.setAttribute('clip-path',`url(#head-${name})`);
+ const url=new URL(`assets/people/${name}-ink.webp`,import.meta.url).href,lineURL=new URL(`assets/people/${name}-line.webp`,import.meta.url).href;
+ const outline=svgNode('image',{href:lineURL,width:600,height:600});if(name==='hong')outline.setAttribute('clip-path',`url(#head-${name})`);
  const lines=svgNode('g',{mask:`url(#line-${name})`});lines.append(outline);
- const paint=svgNode('image',{href:url,width:600,height:600,filter:`url(#ink-${name})`}),fill=svgNode('g',{mask:`url(#fill-${name})`});fill.append(paint);svg.append(lines,fill);host.append(svg);
- const preload=new Image();preload.src=url;const ready=preload.decode().then(()=>true).catch(()=>false);
+ const paint=svgNode('image',{href:url,width:600,height:600}),fill=svgNode('g',{mask:`url(#fill-${name})`});fill.append(paint);svg.append(lines,fill);host.append(svg);
+ const ready=Promise.all([url,lineURL].map(src=>{const image=new Image();image.src=src;return image.decode()})).then(()=>true).catch(()=>false);
  const data={host,lines,fill,brushes,ready,lengths:brushes.map(brush=>brush.getTotalLength())};portraits.set(name,data);return data;
 }
 for(const name of ['hye','hong']){
- createPortrait(name);const p=stage.querySelector(`[data-bio="${name}"]`);p.setAttribute('aria-label',copy[name].join(' '));
+ const p=stage.querySelector(`[data-bio="${name}"]`);p.setAttribute('aria-label',copy[name].join(' '));
  let index=0;for(const line of copy[name]){const row=document.createElement('span');row.className='bio-line';row.setAttribute('aria-hidden','true');for(const char of [...line]){const span=document.createElement('span');span.className='bio-letter';span.textContent=char===' '?'\u00a0':char;span.style.setProperty('--letter-delay',`${index++*24}ms`);row.append(span)}p.append(row)}
 }
 function clearMotion(){
@@ -59,7 +39,7 @@ function animate(el,keyframes,options){const animation=el.animate(keyframes,opti
 function written(slide){slide.classList.add('is-written')}
 async function draw(slide){
  const name=slide.querySelector('[data-portrait]')?.dataset.portrait;if(!name)return;
- const data=portraits.get(name),token=epoch;slide.classList.remove('is-written');data.host.dataset.drawPhase='lines';
+ const data=portraits.get(name)||createPortrait(name),token=epoch;slide.classList.remove('is-written');data.host.dataset.drawPhase='lines';
  data.lines.style.opacity='1';data.fill.setAttribute('mask',`url(#fill-${name})`);
  data.brushes.forEach((brush,i)=>{brush.style.strokeDasharray=data.lengths[i];brush.style.strokeDashoffset=data.lengths[i]});
  const loaded=await data.ready;if(token!==epoch)return;if(!loaded){data.host.textContent='프로필 그림을 불러오지 못했어요.';written(slide);return;}
@@ -92,6 +72,7 @@ window.simsimPeople={
 };
 new IntersectionObserver(entries=>{
  const wasVisible=visible;visible=entries[0].isIntersecting;
+ if(visible&&!portraits.size){for(const name of ['hye','hong'])createPortrait(name)}
  if(visible&&!wasVisible&&state.index)draw(slides[state.index]);
  if(!visible){clearMotion();state.unlock();clearTimeout(transitionTimer)}
 },{threshold:.55}).observe(section);
