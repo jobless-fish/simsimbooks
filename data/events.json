@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "events": [
     {
+      "id": "3c520a69-fa7c-4811-addc-74ad52c7fe51",
+      "title": "반딧불이 집현전",
+      "startAt": "2026-10-10T05:00:00.000Z",
+      "endAt": null,
+      "location": "심심한책방",
+      "description": "10월10일 세종에서 열리는 <반딧불이집현전>에 오시면\n심심한책방의 혜원작가와 이은홍작가를 만날 수 있습니다.  \n「2026년 한글 반딧불이 집현전」에서 특별한 책방 여행을 만나보세요.",
+      "registrationUrl": "",
+      "poster": "assets/events/3c520a69-fa7c-4811-addc-74ad52c7fe51.jpg",
+      "createdAt": "2026-10-22T13:59:00.656Z",
+      "updatedAt": "2026-10-22T13:59:00.656Z",
+      "requestHash": "C4zIfgDu4f21wWul3PPC6CkwL0c8E_V84FBeSUUqdfw"
+    },
+    {
       "id": "e7fe3fb2-a781-454c-b11d-406c1185651d",
       "title": "업로드 테스트 22222",
       "startAt": "2026-11-02T09:30:00.000Z",
