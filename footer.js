@@ -129,7 +129,7 @@ function layout(){
 function draw(p){
  const cardEase=smooth(p/.42);
  const shift=cardEase*cardShift;
- card.style.setProperty("--map-trail-progress",smooth((p-.08)/.48));
+ card.style.setProperty("--map-camera",smooth(p/.48));
  card.style.height=(initialCardHeight+(finalCardHeight-initialCardHeight)*cardEase)+'px';
  const rise=smooth((p-.20)/.40);
  scene.style.setProperty('--info-card-shift',(-shift)+'px');
