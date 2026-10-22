@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1080 1080" role="img" aria-labelledby="title desc">
+<title id="title">책을 싣고 달리는 고양이의 미니</title><desc id="desc">선글라스를 쓴 고양이가 운전하는 노란 미니 자동차. 지붕에는 책이 쌓여 있고 차체와 책이 가볍게 들썩입니다.</desc>
+<defs><clipPath id="window"><path d="M523 441H612Q630 441 638 464L661 533H495Z"/></clipPath></defs><g transform="translate(1080 0) scale(-1 1)">
+<g opacity=".5"><animateTransform attributeName="transform" type="translate" values="0 0;8 0;0 0" dur=".567s" repeatCount="indefinite"/><path d="M221 719H836" stroke="#111" stroke-width="20" stroke-linecap="round"/></g>
+<g><animateTransform attributeName="transform" type="translate" values="0 0;0 6;0 -1;0 0" keyTimes="0;.53;.85;1" dur=".567s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/>
+<circle cx="321" cy="674" r="49" fill="#111"/><circle cx="563" cy="674" r="49" fill="#111"/>
+</g>
+<g id="car-body"><animateTransform attributeName="transform" type="translate" values="0 0;0 12;0 -2;0 0" keyTimes="0;.53;.85;1" dur=".567s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/>
+<!-- books and roof rack -->
+<g id="books" transform="translate(63 0)"><g><g id="book-1"><animateTransform attributeName="transform" type="rotate" values="0 449.0 385;0.8 449.0 385;-0.52 449.0 385;0 449.0 385" keyTimes="0;.4;.72;1" dur=".567s" begin="0.0s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><rect x="354" y="355" width="190" height="30" rx="5" fill="#327f86"/><path d="M366 362H539V378H366Q359 370.0 366 362" fill="#fff6dc"/><path d="M373 370.0H531" stroke="#dcd2b8" stroke-width="2"/></g><g id="book-2"><animateTransform attributeName="transform" type="rotate" values="0 454.5 358;-1.3 454.5 358;0.8450000000000001 454.5 358;0 454.5 358" keyTimes="0;.4;.72;1" dur=".567s" begin="-0.045s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><rect x="362" y="328" width="185" height="30" rx="5" fill="#ef815a"/><path d="M374 335H542V351H374Q367 343.0 374 335" fill="#fff6dc"/><path d="M381 343.0H534" stroke="#dcd2b8" stroke-width="2"/></g><g id="book-3"><animateTransform attributeName="transform" type="rotate" values="0 444.0 331;1.8 444.0 331;-1.1700000000000002 444.0 331;0 444.0 331" keyTimes="0;.4;.72;1" dur=".567s" begin="-0.09s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><rect x="357" y="301" width="174" height="30" rx="5" fill="#dfbf40"/><path d="M369 308H526V324H369Q362 316.0 369 308" fill="#fff6dc"/><path d="M376 316.0H518" stroke="#dcd2b8" stroke-width="2"/></g><g id="book-4"><animateTransform attributeName="transform" type="rotate" values="0 449.5 304;-2.4 449.5 304;1.56 449.5 304;0 449.5 304" keyTimes="0;.4;.72;1" dur=".567s" begin="-0.135s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><rect x="369" y="274" width="161" height="30" rx="5" fill="#536a9b"/><path d="M381 281H525V297H381Q374 289.0 381 281" fill="#fff6dc"/><path d="M388 289.0H517" stroke="#dcd2b8" stroke-width="2"/></g>
+<path d="M411 275L425 385M514 275L502 385" stroke="#b58e53" stroke-width="7" opacity=".9"/>
+</g><path d="M350 388H564M371 389V413M544 389V413" stroke="#444844" stroke-width="8" stroke-linecap="round"/></g>
+<!-- window silhouette and roof -->
+<path d="M277 539L364 418Q372 406 390 406H646Q670 406 681 435L744 595L728 667H254Z" fill="#d0c52b"/>
+<path d="M294 531L375 433Q379 428 389 428H483L446 531Z" fill="#fff"/>
+<path d="M507 428H612Q637 428 646 454L674 533H473Z" fill="#fff"/>
+<path d="M663 442L701 532H688L656 448Q654 440 658 438Q661 437 663 442" fill="#141614"/>
+<!-- cat driver clipped within window -->
+<g clip-path="url(#window)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 2;0 0" keyTimes="0;.53;.85;1" dur=".567s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/>
+<path d="M537 545Q530 511 560 506Q598 502 614 546" fill="#327f86"/>
+<path d="M542 474L539 444L560 458Q576 451 588 458L608 445L604 477Q611 504 586 516Q560 523 545 501Z" fill="#e9ab66"/>
+<path d="M546 455L548 469L555 462M597 456L593 469L602 466" fill="#c77a50"/>
+<path d="M551 484Q574 473 594 484Q589 505 573 506Q557 506 551 484" fill="#f8d6a3"/>
+<path d="M542 475L568 473L569 482Q566 491 555 490Q546 490 544 483ZM575 473L602 472L600 482Q598 490 587 489Q577 489 576 482Z" fill="#141918"/>
+<path d="M566 477H578M540 475L535 472" stroke="#141918" stroke-width="5" stroke-linecap="round"/>
+<path d="M550 477L558 477M583 476L591 476" stroke="#fff" stroke-width="2" opacity=".7"/>
+<path d="M569 494L577 493L574 498Z" fill="#9c5a42"/>
+<path d="M574 498Q572 503 567 500M574 498Q578 503 581 499" stroke="#9c5a42" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M550 497L536 494M550 502L535 504M594 495L608 490M595 500L610 500" stroke="#b6784e" stroke-width="2" stroke-linecap="round"/>
+<circle cx="525" cy="538" r="24" stroke="#343a36" stroke-width="7" fill="none"/><path d="M548 522L539 531" stroke="#e9ab66" stroke-width="13" stroke-linecap="round"/>
+</g></g>
+<!-- car body flat color panels -->
+<path d="M280 533L447 533L511 507L483 566V676H264Q243 674 241 653L237 591Q237 564 280 553Z" fill="#e4df20"/>
+<path d="M483 553L511 533H704L744 597V660Q744 677 726 677H483Z" fill="#d0c52b"/>
+<path d="M483 626H744V665Q744 679 728 679H483Z" fill="#e4df20"/>
+<path d="M576 541V627M686 541L704 625" stroke="#e8df53" stroke-width="2"/>
+<rect x="518" y="548" width="37" height="12" rx="6" fill="#e8e52b"/><rect x="645" y="548" width="36" height="12" rx="6" fill="#e8e52b"/>
+<rect x="467" y="503" width="34" height="49" rx="17" fill="#e4df20"/><rect x="279" y="503" width="31" height="42" rx="16" fill="#e4df20"/>
+<path d="M739 577H746Q755 577 756 589V612Q755 623 745 623H741Z" fill="#ef5543"/>
+<!-- wheel arches -->
+<path d="M436 679V667a51 51 0 0 1 102 0V679Z" fill="#111"/>
+<path d="M650 679V667a51 51 0 0 1 102 0V679Z" fill="#111"/>
+<!-- grille, lamps, bumpers -->
+<rect x="252" y="583" width="156" height="38" rx="13" fill="#111"/>
+<g fill="#fff"><circle cx="275" cy="602" r="13"/><circle cx="301" cy="602" r="10"/><circle cx="359" cy="602" r="10"/><circle cx="385" cy="602" r="13"/></g>
+<rect x="230" y="627" width="207" height="32" rx="16" fill="#d0c52b"/><rect x="245" y="633" width="144" height="10" rx="5" fill="#eae82d"/>
+<path d="M743 631H761L753 678H738Z" fill="#d0c52b"/>
+<g transform="rotate(-4 309 659)"><rect x="282" y="644" width="55" height="31" rx="4" fill="#141918"/><g fill="#fff"><ellipse cx="309" cy="663" rx="8" ry="6"/><circle cx="300" cy="655" r="3"/><circle cx="307" cy="652" r="3"/><circle cx="315" cy="653" r="3"/><circle cx="320" cy="658" r="3"/></g></g>
+</g>
+<!-- independently bouncing wheels -->
+<g transform="translate(487 674)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 5;0 -2;0 0" keyTimes="0;.53;.85;1" dur=".567s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><circle r="47" fill="#111"/><circle r="25" fill="#fff"/><g><animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur=".85s" repeatCount="indefinite"/><path d="M0 0Q-8 -25 -25 -17L-28 -3Q-10 -9 0 0" fill="#111"/></g></g></g><g transform="translate(701 674)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 5;0 -2;0 0" keyTimes="0;.53;.85;1" dur=".567s" repeatCount="indefinite" calcMode="spline" keySplines=".33 0 .67 1;.33 0 .67 1;.33 0 .67 1"/><circle r="47" fill="#111"/><circle r="25" fill="#fff"/><g><animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur=".85s" repeatCount="indefinite"/><path d="M0 0Q-8 -25 -25 -17L-28 -3Q-10 -9 0 0" fill="#111"/></g></g></g></g></svg>
