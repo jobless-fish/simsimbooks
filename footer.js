@@ -1,3 +1,4 @@
+import {createMarqueeMotion,wrapMarquee} from './marquee-motion.js';
 const info=document.querySelector('#info');
 const scene=info.querySelector('.info-scene');
 const card=scene.querySelector('.introduction');
@@ -171,3 +172,67 @@ footer.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('cli
  const nav=document.querySelector(`.section-nav a[href="${destination}"]`);
  if(nav){event.preventDefault();nav.click();nav.focus({preventScroll:true})}
 }));
+
+// One continuous coordinate is shared by automatic motion, drag and inertia.
+const neighborMarquee=footer.querySelector('.neighbors-marquee');
+const neighborTrack=neighborMarquee.querySelector('.neighbors-track');
+const neighborGroup=neighborTrack.querySelector('.neighbors-group');
+const neighborMotion=createMarqueeMotion();
+let neighborHovered=false,neighborRate=1,neighborLast=0,neighborFrame=0,neighborSpan=0;
+let neighborPointer=null,suppressNeighborClickUntil=0;
+neighborMarquee.tabIndex=0;
+function paintNeighbors(){neighborTrack.style.transform=`translate3d(${wrapMarquee(neighborMotion.position,neighborSpan)}px,0,0)`}
+function neighborTick(now){
+ neighborFrame=0;const dt=neighborLast?Math.min(.05,(now-neighborLast)/1000):0;neighborLast=now;
+ const box=neighborMarquee.getBoundingClientRect();
+ if(!document.hidden&&box.bottom>0&&box.top<innerHeight&&!footer.inert){
+  const keyboardFocus=neighborMarquee.matches(':focus-visible')||!!neighborMarquee.querySelector(':focus-visible');
+  const wanted=(neighborHovered||keyboardFocus) ? 0.1 : 1;
+  neighborRate+=(wanted-neighborRate)*(1-Math.exp(-7*dt));
+  neighborMotion.step(dt,-neighborSpan/42*neighborRate);paintNeighbors();
+ }
+ if(!reduced.matches)neighborFrame=requestAnimationFrame(neighborTick);
+}
+function measureNeighbors(){neighborSpan=neighborGroup.getBoundingClientRect().width;paintNeighbors()}
+function startNeighbors(){if(!reduced.matches&&!neighborFrame){neighborLast=0;neighborFrame=requestAnimationFrame(neighborTick)}}
+neighborMarquee.addEventListener('pointerenter',event=>{neighborHovered=event.pointerType!=='touch'});
+neighborMarquee.addEventListener('pointerleave',()=>{neighborHovered=false});
+neighborMarquee.addEventListener('pointerdown',event=>{
+ if(event.button!==0||!event.isPrimary)return;
+ suppressNeighborClickUntil=0;
+ neighborPointer={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastAt:performance.now(),speed:0,moved:false,origin:0};
+});
+neighborMarquee.addEventListener('pointermove',event=>{
+ const p=neighborPointer;if(!p||p.id!==event.pointerId)return;
+ const dx=event.clientX-p.x,dy=event.clientY-p.y;
+ if(!p.moved){
+  if(Math.abs(dx)<6)return;
+  if(Math.abs(dy)>Math.abs(dx)){neighborPointer=null;return}
+  p.moved=true;p.origin=neighborMotion.begin();neighborMarquee.setPointerCapture(event.pointerId);neighborMarquee.classList.add('dragging');
+ }
+ if(event.cancelable)event.preventDefault();
+ const now=performance.now(),dt=(now-p.lastAt)/1000;
+ if(dt>0)p.speed=p.speed*.55+(event.clientX-p.lastX)/dt*.45;
+ p.lastX=event.clientX;p.lastAt=now;neighborMotion.drag(p.origin+dx);
+ if(reduced.matches){neighborMotion.settle();paintNeighbors()}
+});
+function endNeighborDrag(event){
+ const p=neighborPointer;if(!p||event.pointerId!==p.id)return;
+ neighborPointer=null;neighborMarquee.classList.remove('dragging');
+ if(p.moved){
+  const speed=event.type==='pointercancel'||performance.now()-p.lastAt>100||reduced.matches?0:p.speed;
+  neighborMotion.release(speed);suppressNeighborClickUntil=performance.now()+250;
+  if(neighborMarquee.hasPointerCapture(event.pointerId))neighborMarquee.releasePointerCapture(event.pointerId);
+ }
+}
+for(const type of ['pointerup','pointercancel','lostpointercapture'])neighborMarquee.addEventListener(type,endNeighborDrag);
+neighborMarquee.addEventListener('click',event=>{if(event.detail&&performance.now()<suppressNeighborClickUntil){event.preventDefault();event.stopPropagation()}},true);
+neighborMarquee.addEventListener('dragstart',event=>event.preventDefault());
+neighborMarquee.addEventListener('keydown',event=>{
+ if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;
+ event.preventDefault();neighborMotion.begin();neighborMotion.drag(neighborMotion.position+(event.key==='ArrowLeft'?1:-1)*neighborSpan/5);neighborMotion.release();
+ if(reduced.matches){neighborMotion.settle();paintNeighbors()}
+});
+new ResizeObserver(measureNeighbors).observe(neighborGroup);
+reduced.addEventListener('change',()=>{cancelAnimationFrame(neighborFrame);neighborFrame=0;neighborMotion.release();neighborMotion.settle();paintNeighbors();startNeighbors()});
+measureNeighbors();startNeighbors();
