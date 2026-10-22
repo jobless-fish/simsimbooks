@@ -35,6 +35,7 @@ async function intro(){
 enter.addEventListener('click',async()=>{
   if(body.dataset.stage==='open'){location.reload();return}
   if(body.dataset.stage!=='ready'||started)return;
+  window.scrollTo({top:0,left:0,behavior:"instant"});
   started=true;clearTimeout(nudgeTimer);sway.classList.remove('nudging');
   body.dataset.stage='opening';enter.disabled=true;enter.setAttribute('aria-label','심심한책방 처음부터 다시 보기');
   // Let the logo dock before the illustrated landscape arrives.
@@ -337,3 +338,13 @@ function updateSectionMotion(){
 }
 window.addEventListener('resize',queuePill);
 reduced.addEventListener('change',queuePill);
+
+// A fresh load or a browser back/forward-cache return always starts at ABOUT.
+window.addEventListener('pageshow',()=>{
+ if('scrollRestoration' in history)history.scrollRestoration='manual';
+ if(location.hash)history.replaceState(history.state,'',location.pathname+location.search);
+ stopGlide();snapAnchor=0;scrollTarget=0;
+ window.simsimGarden?.reset();
+ window.scrollTo({top:0,left:0,behavior:'instant'});
+ queuePill();
+});
