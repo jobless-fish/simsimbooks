@@ -233,7 +233,7 @@ body.garden-revealed .bottom-edge-blur{opacity:0!important}
 .people-scroll-note{font-size:calc(calc(10px * var(--site-density,1)) * 1.12 * var(--people-text-scale,1));line-height:1.8;color:#959b93;margin:calc(20px * var(--site-density,1)) 0 0}
 .people-bio-copy{opacity:0;transform:translateY(calc(5px * var(--site-density,1)));transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
 .is-written .people-bio-copy{opacity:1;transform:none}
-.bio-line{display:block;white-space:nowrap}
+.bio-line{display:block;white-space:normal;overflow-wrap:anywhere}
 .bio-letter{display:inline-block;opacity:0}
 .is-written .bio-letter{animation:bio-letter .58s cubic-bezier(.2,.7,.2,1) var(--letter-delay) both}
 .people-step{position:absolute;bottom:calc(16px * var(--site-density,1));right:var(--section-title-x);font:calc(10px * var(--site-density,1))/1.6 Paperlogy,sans-serif;color:#8d948b;letter-spacing:.06em}
