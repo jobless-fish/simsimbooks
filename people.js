@@ -7,10 +7,10 @@ const portraits=new Map();let epoch=0,animations=new Set(),transitionTimer=0,vis
 function svgNode(tag,attrs={}){const el=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el}
 // Reveal the original coloured marks, then fill the original illustration.
 function brushRoute(offset=0){
- let d='';for(let i=0;i<36;i++){
-  const y=-8+i*18,left=-35+(i%3)*5,right=635-(i%4)*4;
+ let d='';for(let i=0;i<72;i++){
+  const y=-6+i*9,left=-35+(i%3)*5,right=635-(i%4)*4;
   const start=i%2?right:left,end=i%2?left:right;
-  d+=(i===0?'M':' L')+start+' '+y+' C '+(start+(end-start)*.3)+' '+(y-6+offset)+' '+(start+(end-start)*.7)+' '+(y+8)+' '+end+' '+(y+3);
+  d+=(i===0?'M':' L')+start+' '+y+' C '+(start+(end-start)*.3)+' '+(y-2+offset)+' '+(start+(end-start)*.7)+' '+(y+2)+' '+end+' '+(y+1);
  }return d;
 }
 function keyWhite(filter){
@@ -37,8 +37,8 @@ function createPortrait(name){
  defs.append(ink,first);
  const brushes=[];
  for(const phase of ['line','fill']){
-  const mask=svgNode('mask',{id:`${phase}-${name}`,maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:600});
-  const brush=svgNode('path',{d:brushRoute(phase==='fill'?7:0),fill:'none',stroke:'white','stroke-width':34,'stroke-linecap':'round','stroke-linejoin':'round'});mask.append(brush);defs.append(mask);brushes.push(brush);
+  const mask=svgNode('mask',{id:`${phase}-${name}`,maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:600,'mask-type':'alpha'});
+  const brush=svgNode('path',{d:brushRoute(phase==='fill'?2:0),fill:'none',stroke:'white','stroke-width':20,'stroke-linecap':'round','stroke-linejoin':'round'});mask.append(brush);defs.append(mask);brushes.push(brush);
  }
  const clip=svgNode('clipPath',{id:`head-${name}`});clip.append(svgNode('rect',{x:0,y:0,width:600,height:510}));defs.append(clip);svg.append(defs);
  const url=new URL(`assets/people/${name}.svg`,import.meta.url).href;
@@ -65,9 +65,9 @@ async function draw(slide){
  const loaded=await data.ready;if(token!==epoch)return;if(!loaded){data.host.textContent='프로필 그림을 불러오지 못했어요.';written(slide);return;}
  if(reduced.matches){data.lines.style.opacity='0';data.fill.removeAttribute('mask');data.host.dataset.drawPhase='complete';written(slide);return}
  try{
-  await animate(data.brushes[0],[{strokeDashoffset:data.lengths[0]},{strokeDashoffset:0}],{duration:3875,easing:'linear',fill:'forwards'}).finished;
+  await animate(data.brushes[0],[{strokeDashoffset:data.lengths[0]},{strokeDashoffset:0}],{duration:1700,easing:'linear',fill:'forwards'}).finished;
   if(token!==epoch)return;data.host.dataset.drawPhase='fill';
-  await animate(data.brushes[1],[{strokeDashoffset:data.lengths[1]},{strokeDashoffset:0}],{duration:4125,easing:'linear',fill:'forwards'}).finished;
+  await animate(data.brushes[1],[{strokeDashoffset:data.lengths[1]},{strokeDashoffset:0}],{duration:1900,easing:'linear',fill:'forwards'}).finished;
   if(token!==epoch)return;
   data.fill.removeAttribute('mask');data.lines.style.opacity='0';data.host.dataset.drawPhase='complete';written(slide);
  }catch{/* Leaving a portrait cancels its current drawing. */}

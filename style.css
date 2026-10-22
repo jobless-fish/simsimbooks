@@ -221,7 +221,7 @@ body.garden-revealed .bottom-edge-blur{opacity:0!important}
 .people-photo img{display:block;width:100%;max-width:calc(428px * var(--site-density,1));height:auto;max-height:var(--people-art-size);aspect-ratio:550/412;object-fit:contain;object-position:center top;border-radius:calc(4px * var(--site-density,1))}
 .people-photo-slide .people-copy{grid-column:2;grid-row:1;align-self:start;padding-top:calc(20px * var(--site-density,1))}
 .people-portrait{display:grid;place-items:center start;grid-column:2;grid-row:1;width:100%;height:var(--people-art-size);font:calc(12px * var(--site-density,1))/1.8 Paperlogy,sans-serif;color:#888}
-.people-portrait>svg{display:block;width:var(--people-art-size);height:var(--people-art-size);max-width:100%;max-height:100%;overflow:visible;mix-blend-mode:multiply}
+.people-portrait>svg{display:block;width:var(--people-art-size);height:var(--people-art-size);max-width:100%;max-height:100%;overflow:visible;mix-blend-mode:multiply;will-change:transform}
 .people-bio-copy{grid-column:3;grid-row:1;align-self:center;position:relative;left:0}
 .people-slide[data-person-step="1"] .people-portrait>svg{transform:translateX(15%)}
 .people-slide[data-person-step="2"] .people-portrait{grid-column:3}
