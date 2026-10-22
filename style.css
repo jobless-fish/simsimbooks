@@ -324,3 +324,9 @@ body.poster-is-open{overflow:hidden!important}
  .people-slide[data-person-step="1"] .people-portrait>svg{transform:none}
  .people-slide[data-person-step="2"] .people-bio-copy{left:0;width:calc(100% + 3vw)}
 }
+
+.visit-actions .visit-booking,.visit-actions .place-link{font:14px/1.6 Paperlogy,sans-serif;box-shadow:0 4px 12px #263b5a18;transition:background .2s,transform .2s,box-shadow .2s}
+.visit-actions .place-link{gap:7px;padding:12px 20px;border-radius:28px;background:#ffffffb8;text-decoration:none;color:var(--blue)}
+.visit-actions .place-link:hover{background:#fff;transform:translateY(-2px)}
+.visit-actions a:hover{box-shadow:0 6px 16px #263b5a22}
+.visit-actions .place-link:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
