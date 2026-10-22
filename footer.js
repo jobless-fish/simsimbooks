@@ -76,7 +76,7 @@ function layout(){
  // Use layout dimensions, not the intro's transient translate/scale transform.
  const reference={width:bookCard.offsetWidth,height:bookCard.offsetHeight,left:(scene.clientWidth-bookCard.offsetWidth)/2};
  const paddingTop=parseFloat(bookStyle.paddingTop),paddingBottom=parseFloat(bookStyle.paddingBottom);
- const cardTop=paddingTop+Math.max(0,(books.clientHeight-paddingTop-paddingBottom-reference.height)/2);
+ const cardTop=paddingTop;
  card.style.left=reference.left+'px';
  card.style.width=reference.width+'px';
  card.style.height='auto';
@@ -152,6 +152,7 @@ function reset(){
 }
 window.simsimGarden={reveal,reset,get revealed(){return revealed},get playing(){return playing}};
 window.addEventListener('resize',layout);
+window.addEventListener('simsim:layout',layout);
 window.addEventListener('simsim:opened',layout);
 document.addEventListener('visibilitychange',()=>draw(progress));
 reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;playing=false;draw(1)}});
