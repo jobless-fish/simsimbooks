@@ -75,7 +75,7 @@ async function draw(slide){
 const book=section.querySelector('.people-book img');
 function turnBook(){
  if(!book||reduced.matches)return;
- animate(book,[{transform:'rotate(0deg) scale(1)'},{transform:'rotate(540deg) scale(.96)',offset:.65},{transform:'rotate(720deg) scale(1)'}],{duration:950,easing:'cubic-bezier(.22,.7,.25,1)'});
+ animate(book,[{transform:'perspective(700px) rotateY(0deg)'},{transform:'perspective(700px) rotateY(360deg)'}],{duration:850,easing:'cubic-bezier(.22,.7,.25,1)'});
 }
 function render(withTransition=true){
  clearMotion();clearTimeout(transitionTimer);
