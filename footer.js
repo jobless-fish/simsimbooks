@@ -88,7 +88,10 @@ function layout(){
  card.style.left=reference.left+'px';
  card.style.width=reference.width+'px';
  card.style.height='auto';
- finalCardHeight=Math.min(reference.height,card.offsetHeight);
+ const cardStyle=getComputedStyle(card);
+ const copy=card.querySelector(".copy-side");
+ const copyMinimum=copy.offsetHeight+parseFloat(cardStyle.paddingTop)+parseFloat(cardStyle.paddingBottom)+2;
+ finalCardHeight=Math.max(copyMinimum,Math.min(reference.height,card.offsetHeight));
  initialCardHeight=reference.height;
  card.style.height=reference.height+'px';
  const blurBoundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
@@ -96,7 +99,7 @@ function layout(){
  const preservedGroundTop=cardTop+finalCardHeight-originalShift+46*density;
  const finalTop=Math.max(blurBoundary+18*density,Math.min(cardTop,viewport*.16));
  cardShift=Math.max(0,cardTop-finalTop);
- finalCardHeight=Math.min(finalCardHeight,Math.max(280*density,preservedGroundTop-finalTop-46*density));
+ finalCardHeight=Math.max(copyMinimum,Math.min(finalCardHeight,Math.max(280*density,preservedGroundTop-finalTop-46*density)));
  scene.style.setProperty('--info-card-top',cardTop+'px');
  // Leave the tallest blooms below the card and use the former empty lower area.
  groundTop=preservedGroundTop+(compact?80:Math.min(210*density,viewport*.16));
@@ -126,6 +129,7 @@ function layout(){
 function draw(p){
  const cardEase=smooth(p/.42);
  const shift=cardEase*cardShift;
+ card.style.setProperty("--map-trail-progress",smooth((p-.08)/.48));
  card.style.height=(initialCardHeight+(finalCardHeight-initialCardHeight)*cardEase)+'px';
  const rise=smooth((p-.20)/.40);
  scene.style.setProperty('--info-card-shift',(-shift)+'px');

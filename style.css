@@ -346,3 +346,15 @@ body.poster-is-open{overflow:hidden!important}
  #info .info-map{top:calc(var(--section-title-y) + var(--section-title-height));bottom:auto;width:calc(100% - var(--section-title-x)*2);height:190px}
  .info-map img{object-position:center bottom}
 }
+
+/* Reserve actual copy space throughout the closing animation. */
+#info .future-section .copy-side{padding-top:0;align-self:center}
+#info .visit-route{margin:16px 0;line-height:1.8}
+#info .visit-reservation-note{margin-bottom:16px}
+#info .visit-actions{gap:10px;flex-wrap:wrap}
+#info .visit-actions a{min-height:36px;padding:8px 14px;font-size:12px;white-space:nowrap}
+.info-map .map-mountain-trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mountain-trail-stroke path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--map-trail-progress,0))}
+.trail-edge{stroke:#9a927d;stroke-width:21}
+.trail-center{stroke:#fff6dc;stroke-width:13}
+@media(max-width:760px){.info-map img{object-position:right bottom}}
