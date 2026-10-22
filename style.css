@@ -330,3 +330,5 @@ body.poster-is-open{overflow:hidden!important}
 .visit-actions .place-link:hover{background:#fff;transform:translateY(-2px)}
 .visit-actions a:hover{box-shadow:0 6px 16px #263b5a22}
 .visit-actions .place-link:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+
+.visit-route,.visit-route strong{color:#171717}.visit-reservation-note{margin:0 0 24px}
