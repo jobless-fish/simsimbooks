@@ -3,60 +3,79 @@ const section=document.querySelector('#artist'),stage=document.querySelector('#p
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),state=createPeopleState(3);
 const ns='http://www.w3.org/2000/svg';
 const copy={hye:['햇살 드는 자리에 책을 펼칩니다.','작은 그림과 긴 이야기를 좋아해요.','천천히 머물다 가실 수 있도록,','책방 한쪽을 다정히 채웁니다.'],hong:['마을의 느린 하루를 책방에 담아요.','재미있는 책은 먼저 펼쳐 보고,','나누고 싶은 이야기는 곁에 둡니다.','심심한 날, 편하게 놀러 오세요.']};
-const portraits=new Map();let epoch=0,frames=new Set(),animations=new Set(),transitionTimer=0,visible=false;
+const portraits=new Map();let epoch=0,animations=new Set(),transitionTimer=0,visible=false;
 function svgNode(tag,attrs={}){const el=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el}
-function pencilRoute(){
- let d='';for(let i=0;i<19;i++){
-  const y=-5+i*34,left=-30+(i%3)*6,right=630-(i%4)*5;
+// Reveal the original coloured marks, then fill the original illustration.
+function brushRoute(offset=0){
+ let d='';for(let i=0;i<18;i++){
+  const y=-16+i*38,left=-35+(i%3)*5,right=635-(i%4)*4;
   const start=i%2?right:left,end=i%2?left:right;
-  d+=(i===0?'M':' L')+start+' '+y+' C '+(start+(end-start)*.28)+' '+(y-8)+' '+(start+(end-start)*.72)+' '+(y+7)+' '+end+' '+(y+4);
+  d+=(i===0?'M':' L')+start+' '+y+' C '+(start+(end-start)*.3)+' '+(y-6+offset)+' '+(start+(end-start)*.7)+' '+(y+8)+' '+end+' '+(y+3);
  }return d;
 }
+function keyWhite(filter){
+ filter.append(svgNode('feColorMatrix',{type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -1 -1 -1 0 3',result:'key'}));
+ const transfer=svgNode('feComponentTransfer',{in:'key',result:'keyed'});transfer.append(svgNode('feFuncA',{type:'linear',slope:'1.12',intercept:'-.06'}));filter.append(transfer,svgNode('feComposite',{in:'SourceGraphic',in2:'keyed',operator:'in',result:'ink'}));
+}
 function createPortrait(name){
- const host=stage.querySelector(`[data-portrait="${name}"]`),svg=svgNode('svg',{viewBox:'0 0 600 600','aria-hidden':'true',focusable:'false'});
- const defs=svgNode('defs'),filter=svgNode('filter',{id:`pencil-${name}`,x:'0%',y:'0%',width:'100%',height:'100%','color-interpolation-filters':'sRGB'});
- filter.append(svgNode('feColorMatrix',{type:'saturate',values:'0'}),svgNode('feConvolveMatrix',{order:'3',kernelMatrix:'1 1 1 1 -8 1 1 1 1',divisor:'1',bias:'1',preserveAlpha:'true'}));
- const paperKey='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -1 -1 -1 0 3';
- function keyWhite(target){target.append(svgNode('feColorMatrix',{type:'matrix',values:paperKey}));const transfer=svgNode('feComponentTransfer');transfer.append(svgNode('feFuncA',{type:'linear',slope:'1.12',intercept:'-.06'}));target.append(transfer,svgNode('feComposite',{in2:'SourceGraphic',operator:'in'}))}
- keyWhite(filter);const ink=svgNode('filter',{id:`ink-${name}`,x:'0%',y:'0%',width:'100%',height:'100%','color-interpolation-filters':'sRGB'});keyWhite(ink);
- const mask=svgNode('mask',{id:`reveal-${name}`,maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:600});
- const brush=svgNode('path',{d:pencilRoute(),fill:'none',stroke:'white','stroke-width':51,'stroke-linecap':'round','stroke-linejoin':'round'});mask.append(brush);defs.append(filter,ink,mask);svg.append(defs);
- const group=svgNode('g',{mask:`url(#reveal-${name})`}),url=new URL(`assets/people/${name}.svg`,import.meta.url).href;
- const sketch=svgNode('image',{href:url,width:600,height:600,filter:`url(#pencil-${name})`}),paint=svgNode('image',{href:url,width:600,height:600,filter:`url(#ink-${name})`});paint.style.opacity='.08';group.append(sketch,paint);svg.append(group);
- const pencil=svgNode('g',{'class':'portrait-pencil'});pencil.append(svgNode('path',{d:'M0 0 L7 -24 L14 -20 L5 3 Z',fill:'#d3ad65',stroke:'#7d714f','stroke-width':1}),svgNode('path',{d:'M0 0 L5 3 L-1 5 Z',fill:'#4e5f55'}));svg.append(pencil);host.append(svg);
+ const host=stage.querySelector(`[data-portrait="${name}"]`),svg=svgNode('svg',{viewBox:'0 0 600 600','aria-hidden':'true',focusable:'false'}),defs=svgNode('defs');
+ const filterAttrs={x:'0%',y:'0%',width:'100%',height:'100%','color-interpolation-filters':'sRGB'};
+ const ink=svgNode('filter',{...filterAttrs,id:`ink-${name}`});keyWhite(ink);
+ const first=svgNode('filter',{...filterAttrs,id:`first-${name}`});
+ if(name==='hye'){
+  // Select her actual blue strokes; no added pencil or monochrome layer.
+  first.append(svgNode('feColorMatrix',{type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -4 0 4 0 -.45',result:'blue'}));
+  first.append(svgNode('feComposite',{in:'SourceGraphic',in2:'blue',operator:'in'}));
+ }else{
+  // Keep the actual outer contour and original hair colours first.
+  keyWhite(first);
+  first.append(svgNode('feMorphology',{in:'ink',operator:'erode',radius:'3',result:'inside'}),svgNode('feComposite',{in:'ink',in2:'inside',operator:'out',result:'contour'}));
+  first.append(svgNode('feColorMatrix',{in:'SourceGraphic',type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 -4 0 4 0 1.2',result:'hairColour'}));
+  first.append(svgNode('feComposite',{in:'ink',in2:'hairColour',operator:'in',result:'hair'}));
+  const merge=svgNode('feMerge');merge.append(svgNode('feMergeNode',{in:'contour'}),svgNode('feMergeNode',{in:'hair'}));first.append(merge);
+ }
+ defs.append(ink,first);
+ const brushes=[];
+ for(const phase of ['line','fill']){
+  const mask=svgNode('mask',{id:`${phase}-${name}`,maskUnits:'userSpaceOnUse',x:0,y:0,width:600,height:600});
+  const brush=svgNode('path',{d:brushRoute(phase==='fill'?7:0),fill:'none',stroke:'white','stroke-width':53,'stroke-linecap':'round','stroke-linejoin':'round'});mask.append(brush);defs.append(mask);brushes.push(brush);
+ }
+ const clip=svgNode('clipPath',{id:`head-${name}`});clip.append(svgNode('rect',{x:0,y:0,width:600,height:510}));defs.append(clip);svg.append(defs);
+ const url=new URL(`assets/people/${name}.svg`,import.meta.url).href;
+ const outline=svgNode('image',{href:url,width:600,height:600,filter:`url(#first-${name})`});if(name==='hong')outline.setAttribute('clip-path',`url(#head-${name})`);
+ const lines=svgNode('g',{mask:`url(#line-${name})`});lines.append(outline);
+ const paint=svgNode('image',{href:url,width:600,height:600,filter:`url(#ink-${name})`}),fill=svgNode('g',{mask:`url(#fill-${name})`});fill.append(paint);svg.append(lines,fill);host.append(svg);
  const preload=new Image();preload.src=url;const ready=preload.decode().then(()=>true).catch(()=>false);
- const data={host,svg,group,brush,paint,sketch,pencil,ready,length:brush.getTotalLength()};portraits.set(name,data);return data;
+ const data={host,lines,fill,brushes,ready,lengths:brushes.map(brush=>brush.getTotalLength())};portraits.set(name,data);return data;
 }
 for(const name of ['hye','hong']){
  createPortrait(name);const p=stage.querySelector(`[data-bio="${name}"]`);p.setAttribute('aria-label',copy[name].join(' '));
  let index=0;for(const line of copy[name]){const row=document.createElement('span');row.className='bio-line';row.setAttribute('aria-hidden','true');for(const char of [...line]){const span=document.createElement('span');span.className='bio-letter';span.textContent=char===' '?'\u00a0':char;span.style.setProperty('--letter-delay',`${index++*24}ms`);row.append(span)}p.append(row)}
 }
 function clearMotion(){
- epoch++;for(const id of frames)cancelAnimationFrame(id);frames.clear();for(const animation of animations)animation.cancel();animations.clear();
- for(const item of portraits.values())item.pencil.style.opacity='0';
+ epoch++;for(const animation of animations)animation.cancel();animations.clear();
 }
 function animate(el,keyframes,options){const animation=el.animate(keyframes,options);animations.add(animation);animation.finished.catch(()=>{});return animation}
 function written(slide){slide.classList.add('is-written')}
 async function draw(slide){
  const name=slide.querySelector('[data-portrait]')?.dataset.portrait;if(!name)return;
- const data=portraits.get(name),token=epoch;slide.classList.remove('is-written');
- data.group.setAttribute('mask',`url(#reveal-${name})`);data.brush.style.strokeDasharray=data.length;data.brush.style.strokeDashoffset=data.length;data.paint.style.opacity='.08';data.sketch.style.opacity='1';
+ const data=portraits.get(name),token=epoch;slide.classList.remove('is-written');data.host.dataset.drawPhase='lines';
+ data.lines.style.opacity='1';data.fill.setAttribute('mask',`url(#fill-${name})`);
+ data.brushes.forEach((brush,i)=>{brush.style.strokeDasharray=data.lengths[i];brush.style.strokeDashoffset=data.lengths[i]});
  const loaded=await data.ready;if(token!==epoch)return;if(!loaded){data.host.textContent='프로필 그림을 불러오지 못했어요.';written(slide);return;}
- if(reduced.matches){data.group.removeAttribute('mask');data.paint.style.opacity='1';data.sketch.style.opacity='0';written(slide);return}
- const duration=2850;animate(data.brush,[{strokeDashoffset:data.length},{strokeDashoffset:0}],{duration,easing:'linear',fill:'forwards'});
- const started=performance.now();data.pencil.style.opacity='.8';
- function tick(now){
-  if(token!==epoch)return;const progress=Math.min(1,(now-started)/duration),point=data.brush.getPointAtLength(data.length*progress);
-  data.pencil.setAttribute('transform',`translate(${point.x} ${point.y}) rotate(-15)`);
-  if(progress<1){const id=requestAnimationFrame(t=>{frames.delete(id);tick(t)});frames.add(id)}
-  else{
-   data.pencil.style.opacity='0';data.group.removeAttribute('mask');
-   const fill=animate(data.paint,[{opacity:.08},{opacity:1}],{duration:650,easing:'ease-out',fill:'forwards'});
-   animate(data.sketch,[{opacity:1},{opacity:0}],{duration:650,easing:'ease-out',fill:'forwards'});
-   fill.finished.then(()=>{if(token===epoch)written(slide)}).catch(()=>{});
-  }
- }
- const id=requestAnimationFrame(t=>{frames.delete(id);tick(t)});frames.add(id);
+ if(reduced.matches){data.lines.style.opacity='0';data.fill.removeAttribute('mask');data.host.dataset.drawPhase='complete';written(slide);return}
+ try{
+  await animate(data.brushes[0],[{strokeDashoffset:data.lengths[0]},{strokeDashoffset:0}],{duration:1550,easing:'linear',fill:'forwards'}).finished;
+  if(token!==epoch)return;data.host.dataset.drawPhase='fill';
+  await animate(data.brushes[1],[{strokeDashoffset:data.lengths[1]},{strokeDashoffset:0}],{duration:1650,easing:'linear',fill:'forwards'}).finished;
+  if(token!==epoch)return;
+  data.fill.removeAttribute('mask');data.lines.style.opacity='0';data.host.dataset.drawPhase='complete';written(slide);
+ }catch{/* Leaving a portrait cancels its current drawing. */}
+}
+const book=section.querySelector('.people-book img');
+function turnBook(){
+ if(!book||reduced.matches)return;
+ animate(book,[{transform:'rotate(0deg) scale(1)'},{transform:'rotate(540deg) scale(.96)',offset:.65},{transform:'rotate(720deg) scale(1)'}],{duration:950,easing:'cubic-bezier(.22,.7,.25,1)'});
 }
 function render(withTransition=true){
  clearMotion();clearTimeout(transitionTimer);
@@ -66,7 +85,7 @@ function render(withTransition=true){
  if(index&&visible)draw(active);
 }
 window.simsimPeople={
- move(direction){if(!state.move(direction))return false;render();return true},
+ move(direction){if(!state.move(direction))return false;render();turnBook();return true},
  canMove(direction){return state.canMove(direction)},
  enter(index){state.set(index);render(false)},
  get busy(){return state.busy},get index(){return state.index}

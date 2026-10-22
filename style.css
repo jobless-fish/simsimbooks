@@ -210,31 +210,52 @@ body.garden-revealed .bottom-edge-blur{opacity:0!important}
 .events-heading{padding-top:max(0px,calc(var(--section-title-y) + var(--section-title-height) + 14px - var(--event-panel-padding)))}
 .books-section{--books-panel-padding:clamp(30px,4vw,68px)}
 .books-heading{padding-top:max(0px,calc(var(--section-title-y) + var(--section-title-height) + 12px - var(--books-panel-padding)))}
-.people-section{display:block;position:relative;min-width:0;padding:calc(var(--section-title-y) + var(--section-title-height) + 20px) var(--section-title-x) 32px}
-.people-stage{position:relative;min-height:clamp(230px,34svh,310px)}
-.people-slide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(26px,5vw,78px);align-items:center;min-height:clamp(230px,34svh,310px);font-family:Paperlogy,sans-serif}
+/* Three balanced columns keep the book, drawing and copy in separate spaces. */
+.people-section{--people-art-size:clamp(235px,38svh,380px);display:block;position:relative;min-width:0;padding:calc(var(--section-title-y) + var(--section-title-height)*.5) var(--section-title-x) 36px}
+.people-stage{position:relative;min-height:calc(var(--people-art-size) + 26px)}
+.people-slide{display:grid;grid-template-columns:minmax(0,25fr) minmax(0,37fr) minmax(0,32fr);column-gap:3%;align-items:center;min-height:calc(var(--people-art-size) + 26px);font-family:Paperlogy,sans-serif}
 .people-slide[hidden]{display:none!important}
-.people-photo img{display:block;width:100%;max-height:min(34svh,310px);aspect-ratio:550/412;object-fit:contain;object-position:left center;border-radius:5px}
-.people-portrait{display:grid;place-items:center;width:100%;height:clamp(230px,34svh,310px);font:12px/1.8 Paperlogy,sans-serif;color:#888}
-.people-portrait svg{display:block;width:auto;max-width:100%;height:100%;overflow:visible;mix-blend-mode:multiply}
-.portrait-pencil{pointer-events:none;opacity:0}
-.people-eyebrow{font-size:11px;line-height:1.7;font-weight:400;color:#7c817c;letter-spacing:.04em;margin:0 0 12px}
-.people-copy h3{font-size:clamp(23px,2.1vw,33px);font-weight:500;line-height:1.5;letter-spacing:-.035em;margin:0 0 18px;color:#2d3431}
-.people-intro,.people-bio{font-size:clamp(12px,1.05vw,16px);font-weight:400;line-height:2;letter-spacing:-.035em;margin:0;color:#626861;word-break:keep-all}
+.people-book{position:absolute;left:var(--section-title-x);top:calc(var(--section-title-y) + var(--section-title-height) - 20px);width:27%;height:calc(var(--people-art-size) + 45px);display:grid;place-items:center;pointer-events:none}
+.people-book img{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;mix-blend-mode:multiply;transform-origin:50% 50%}
+.people-photo{display:flex;justify-content:flex-end;grid-column:3;grid-row:1;align-self:start}
+.people-photo img{display:block;width:100%;max-width:428px;height:auto;max-height:var(--people-art-size);aspect-ratio:550/412;object-fit:contain;object-position:center top;border-radius:4px}
+.people-photo-slide .people-copy{grid-column:2;grid-row:1;align-self:start;padding-top:20px}
+.people-portrait{display:grid;place-items:center start;grid-column:2;grid-row:1;width:100%;height:var(--people-art-size);font:12px/1.8 Paperlogy,sans-serif;color:#888}
+.people-portrait>svg{display:block;width:var(--people-art-size);height:var(--people-art-size);max-width:100%;max-height:100%;overflow:visible;mix-blend-mode:multiply}
+.people-bio-copy{grid-column:3;grid-row:1;align-self:center;position:relative;left:clamp(-78px,-4vw,-30px)}
+.people-slide[data-person-step="2"] .people-portrait{grid-column:3}
+.people-slide[data-person-step="2"] .people-bio-copy{grid-column:2;position:relative;left:clamp(40px,7.5vw,140px)}
+.people-eyebrow{font-size:clamp(10px,.8vw,13px);line-height:1.7;font-weight:400;color:#7c817c;letter-spacing:.04em;margin:0 0 12px}
+.people-copy h3{font-size:clamp(23px,1.7vw,32px);font-weight:500;line-height:1.5;letter-spacing:-.035em;margin:0 0 18px;color:#2d3431}
+.people-intro,.people-bio{font-size:clamp(12px,.94vw,16px);font-weight:400;line-height:2;letter-spacing:-.035em;margin:0;color:#626861;word-break:keep-all}
 .people-scroll-note{font-size:10px;line-height:1.8;color:#959b93;margin:20px 0 0}
 .people-bio-copy{opacity:0;transform:translateY(5px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
 .is-written .people-bio-copy{opacity:1;transform:none}
 .bio-line{display:block;white-space:nowrap}
 .bio-letter{display:inline-block;opacity:0}
 .is-written .bio-letter{animation:bio-letter .58s cubic-bezier(.2,.7,.2,1) var(--letter-delay) both}
-.people-step{position:absolute;bottom:18px;right:var(--section-title-x);font:10px/1.6 Paperlogy,sans-serif;color:#8d948b;letter-spacing:.06em}
+.people-step{position:absolute;bottom:16px;right:var(--section-title-x);font:10px/1.6 Paperlogy,sans-serif;color:#8d948b;letter-spacing:.06em}
 @keyframes bio-letter{from{opacity:0;transform:translateY(7px);filter:blur(2px)}to{opacity:1;transform:none;filter:blur(0)}}
-@media(max-width:900px) and (min-width:641px){.people-slide{gap:22px}.people-intro,.people-bio{font-size:11px}.people-copy h3{font-size:25px}.people-eyebrow{font-size:10px}}
-@media(max-width:640px){.people-section{min-height:0;padding-bottom:32px}.people-stage{min-height:330px}.people-slide{grid-template-columns:1fr;gap:15px;min-height:330px;align-content:center}.people-photo img{width:min(100%,270px);height:min(23svh,180px);margin:auto;object-position:center}.people-portrait{height:min(23svh,180px)}.people-copy{text-align:left}.people-copy h3{font-size:22px;line-height:1.4;margin-bottom:10px}.people-photo-slide h3 br{display:block}.people-eyebrow{font-size:9px;margin-bottom:6px}.people-intro,.people-bio{font-size:11px;line-height:1.95}.people-scroll-note{font-size:9px;margin-top:10px}.people-step{bottom:12px;font-size:9px}.events-section{--event-panel-padding:30px}.books-section{--books-panel-padding:30px}}
+@media(max-width:1050px) and (min-width:641px){.people-slide{grid-template-columns:minmax(0,23fr) minmax(0,36fr) minmax(0,35fr)}.people-book{width:20%}.people-intro,.people-bio{font-size:11px}.people-copy h3{font-size:23px}.people-eyebrow{font-size:10px}}
+@media(max-width:640px){
+ .people-section{--people-art-size:min(23svh,175px);min-height:0;padding-top:calc(var(--section-title-y) + var(--section-title-height) + 16px);padding-bottom:32px}
+ .people-stage{min-height:330px}
+ .people-slide{display:flex;flex-direction:column;gap:14px;min-height:330px;justify-content:center;align-items:stretch}
+ .people-book{top:calc(var(--section-title-y) + var(--section-title-height) + 22px);width:56px;height:66px}
+ .people-photo{order:0;padding-left:56px;align-self:stretch}
+ .people-photo img{width:100%;height:var(--people-art-size);margin:auto;object-position:center}
+ .people-portrait{order:0;place-items:center;height:var(--people-art-size);padding-left:42px;box-sizing:border-box}
+ .people-bio-copy,.people-slide[data-person-step="2"] .people-bio-copy{left:0}
+ .people-copy,.people-photo-slide .people-copy{order:1;text-align:left;padding-top:0;align-self:stretch}
+ .people-copy h3{font-size:22px;line-height:1.4;margin-bottom:9px}
+ .people-eyebrow{font-size:9px;margin-bottom:6px}
+ .people-intro,.people-bio{font-size:11px;line-height:1.95}
+ .people-scroll-note{font-size:9px;margin-top:9px}
+ .people-step{bottom:12px;font-size:9px}
+ .events-section{--event-panel-padding:30px}.books-section{--books-panel-padding:30px}
+}
 @media(prefers-reduced-motion:reduce){.people-bio-copy{transition:none}.bio-letter{opacity:1}.is-written .bio-letter{animation:none}}
 
-.people-portrait>svg{width:clamp(230px,34svh,310px);height:clamp(230px,34svh,310px);max-width:100%;max-height:100%}
-@media(max-width:640px){.people-portrait>svg{width:min(23svh,180px);height:min(23svh,180px)}}
 /* Reserve enough room below aligned headings to keep cards inside the viewport. */
 #events .event-poster img,#events .event-copy{max-height:min(48svh,max(170px,calc(100svh - var(--shared-card-top) - var(--section-title-y) - var(--section-title-height) - 180px)))}
 #books .book-cover{flex-basis:clamp(170px,min(22vw,calc(100svh - var(--shared-card-top) - var(--section-title-y) - var(--section-title-height) - 210px)),310px)}
