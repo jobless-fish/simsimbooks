@@ -333,6 +333,6 @@ body.poster-is-open{overflow:hidden!important}
 
 .visit-route,.visit-route strong{color:#171717}.visit-reservation-note{margin:0 0 24px}
 
-#info .info-cat{position:absolute;left:var(--section-title-x);top:calc(var(--section-title-y) + var(--section-title-height) + 20px);width:36%;height:calc(100% - var(--section-title-y) - var(--section-title-height) - 56px);display:grid;place-items:center;pointer-events:none}
-.info-cat-svg{display:block;width:100%;height:100%;overflow:visible}
-@media(max-width:760px){#info .future-section .title-side{height:150px}#info .info-cat{top:calc(var(--section-title-y) + var(--section-title-height) + 12px);width:calc(100% - var(--section-title-x)*2);height:120px}}
+#info .info-map{position:absolute;left:var(--section-title-x);top:calc(var(--section-title-y) + var(--section-title-height) + 20px);width:36%;height:calc(100% - var(--section-title-y) - var(--section-title-height) - 56px);display:grid;place-items:center;pointer-events:none}
+.info-map img{display:block;width:100%;height:100%;object-fit:contain}
+@media(max-width:760px){#info .future-section .title-side{height:180px}#info .info-map{top:calc(var(--section-title-y) + var(--section-title-height) + 12px);width:calc(100% - var(--section-title-x)*2);height:150px}}

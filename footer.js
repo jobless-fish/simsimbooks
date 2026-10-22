@@ -250,8 +250,3 @@ new IntersectionObserver(entries=>{neighborsVisible=entries[0].isIntersecting;sy
 reduced.addEventListener('change',syncActivity);
 measureNeighbors();syncActivity();
 
-// The visit illustration rests while offscreen, hidden, or motion is reduced.
-const visitCat=card.querySelector('.info-cat-svg');
-let visitCatVisible=false;
-function syncVisitCat(){if(!visitCat)return;if(visitCatVisible&&!document.hidden&&!reduced.matches)visitCat.unpauseAnimations();else visitCat.pauseAnimations()}
-if(visitCat){visitCat.pauseAnimations();new IntersectionObserver(entries=>{visitCatVisible=entries[0].isIntersecting;syncVisitCat()}).observe(visitCat);document.addEventListener('visibilitychange',syncVisitCat);reduced.addEventListener('change',syncVisitCat)}
