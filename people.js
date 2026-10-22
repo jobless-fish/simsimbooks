@@ -2,7 +2,7 @@ import {createPeopleState} from './people-state.js';
 const section=document.querySelector('#artist'),stage=document.querySelector('#people-stage'),slides=[...stage.querySelectorAll('.people-slide')],counter=document.querySelector('#people-step');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),state=createPeopleState(3);
 const ns='http://www.w3.org/2000/svg';
-const copy={hye:['월악산 아래서 마당 가꾸고 바느질하며 그림을 그립니다. ‘글자 없는 그림책’ 시리즈를 펴냈으며 《어진이의 농장 일기》《세 엄마 이야기》《할머니에겐 뭔가 있어》《우리가 사는 자연》《평등은 개뿔》《와글와글 재밌어》 등을 쓰고 그렸습니다.'],hong:['《역사야, 나오너라!》《술꾼》(2001년 ‘오늘의 우리 만화상’ 수상) 《세상에서 가장 멋진 내 친구 똥퍼》(2008년 ‘부천 만화상’ 수상) 등이 있습니다.']};
+const copy={hye:['월악산 아래서 마당 가꾸고 바느질하며 그림을 그립니다. ‘글자 없는 그림책’ 시리즈를 펴냈으며 《어진이의 농장 일기》《세 엄마 이야기》《할머니에겐 뭔가 있어》《우리가 사는 자연》《평등은 개뿔》《와글와글 재밌어》 등을 쓰고 그렸습니다.'],hong:['1960년 전주에서 태어났다. <깡순이> 연재, 90년대 이후 역사를 새롭게 만화로 해석하는 작업을 통해 <역사신문>, <세계사신문>, <역사야, 나오너라> 등의 작품을 그렸다. 《역사야, 나오너라!》《술꾼》(2001년 ‘오늘의 우리 만화상’ 수상) 《세상에서 가장 멋진 내 친구 똥퍼》(2008년 ‘부천 만화상’ 수상) 등이 있습니다.']};
 const portraits=new Map();let epoch=0,animations=new Set(),transitionTimer=0,visible=false;
 function svgNode(tag,attrs={}){const el=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el}
 // Reveal the original coloured marks, then fill the original illustration.

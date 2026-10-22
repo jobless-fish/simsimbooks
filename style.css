@@ -318,3 +318,9 @@ body.poster-is-open{overflow:hidden!important}
 .visit-booking:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
 .visit-actions .place-link{margin:0;min-height:44px;display:inline-flex;align-items:center;font-size:16px}
 @media(max-width:640px){.visit-route{font-size:14px}.visit-actions{gap:10px 18px}}
+
+@media(min-width:641px){
+ .people-slide[data-person-step="1"]{grid-template-columns:minmax(0,25fr) minmax(0,32fr) minmax(0,37fr)}
+ .people-slide[data-person-step="1"] .people-portrait>svg{transform:none}
+ .people-slide[data-person-step="2"] .people-bio-copy{left:0;width:calc(100% + 3vw)}
+}
