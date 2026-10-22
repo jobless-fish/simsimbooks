@@ -6,6 +6,7 @@ const flowerBed=document.querySelector('#garden-flowers');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
+let density=1;
 let seed=27183;
 const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
 const colors=['#fff9e9','#e6bd57','#91adc8','#e5acb5','#b8a5cf','#e5a184','#f3e0a8'];
@@ -31,7 +32,7 @@ const flowers=Array.from({length:96},(_,i)=>{
  const lean=-12+random()*24;
  const plant=document.createElement('div');plant.className='garden-flower';
  plant.style.left=(x*100)+'%';
- plant.style.width=(44+random()*22)+'px';
+ const width=44+random()*22;plant.style.width=width+'px';
  plant.style.height=(height+28)+'px';
  plant.style.color=colors[Math.floor(random()*colors.length)];
  plant.style.opacity=horizon?'.9':'.42';
@@ -41,7 +42,7 @@ const flowers=Array.from({length:96},(_,i)=>{
  const wind=document.createElement('div');wind.className='flower-wind';
  wind.append(plant.firstElementChild);plant.append(wind);
  flowerBed.append(plant);
- return {plant,x,depth,delay:.44+random()*.38};
+ return {plant,x,depth,width,height,delay:.44+random()*.38};
 });
 let cardShift=0,sceneHeight=0,frame=0,startedAt=0,progress=0,initialCardHeight=0,finalCardHeight=0;
 let revealed=false,playing=false;
@@ -55,20 +56,22 @@ function horizon(x){
  return groundTop+bez((lo+hi)/2,110,16,0,0)*groundHeight/500;
 }
 function positionFlowers(){
- const width=scene.clientWidth,span=width+160;
+ const width=scene.clientWidth,span=width+160*density;
  flowers.forEach(({plant,x,depth})=>{
-  const px=((x*span-drift)%span+span)%span-80;
+  const px=((x*span-drift)%span+span)%span-80*density;
   plant.style.left=px+'px';
-  plant.style.top=(horizon(clamp(px/width))+depth)+'px';
+  plant.style.top=(horizon(clamp(px/width))+depth*density)+'px';
  });
 }
 function ambient(now){
  const dt=ambientLast?Math.min(.05,(now-ambientLast)/1000):0;ambientLast=now;
  const box=scene.getBoundingClientRect();
- if(!reduced.matches&&!document.hidden&&box.bottom>0&&box.top<innerHeight){drift+=dt*26;positionFlowers()}
+ if(!reduced.matches&&!document.hidden&&box.bottom>0&&box.top<innerHeight){drift+=dt*26*density;positionFlowers()}
  if(revealed)ambientFrame=requestAnimationFrame(ambient);
 }
 function layout(){
+ density=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-density'))||1;
+ flowers.forEach(({plant,width,height})=>{plant.style.width=width*density+'px';plant.style.height=(height+28)*density+'px'});
  const viewport=document.documentElement.clientHeight;
  const compact=innerWidth<=640;
  const books=document.querySelector('#books');
@@ -84,33 +87,35 @@ function layout(){
  initialCardHeight=reference.height;
  card.style.height=reference.height+'px';
  const blurBoundary=document.querySelector('.logo-anchor').getBoundingClientRect().bottom;
- const originalShift=Math.max(0,cardTop-blurBoundary-18);
- const preservedGroundTop=cardTop+finalCardHeight-originalShift+46;
- const finalTop=Math.max(blurBoundary+18,Math.min(cardTop,viewport*.16));
+ const originalShift=Math.max(0,cardTop-blurBoundary-18*density);
+ const preservedGroundTop=cardTop+finalCardHeight-originalShift+46*density;
+ const finalTop=Math.max(blurBoundary+18*density,Math.min(cardTop,viewport*.16));
  cardShift=Math.max(0,cardTop-finalTop);
- finalCardHeight=Math.min(finalCardHeight,Math.max(280,preservedGroundTop-finalTop-46));
+ finalCardHeight=Math.min(finalCardHeight,Math.max(280*density,preservedGroundTop-finalTop-46*density));
  scene.style.setProperty('--info-card-top',cardTop+'px');
  // Leave the tallest blooms below the card and use the former empty lower area.
- groundTop=preservedGroundTop+(compact?80:Math.min(210,viewport*.16));
- const footerTop=groundTop+(compact?72:92);
+ groundTop=preservedGroundTop+(compact?80:Math.min(210*density,viewport*.16));
+ let footerTop=groundTop+(compact?72:92*density);
  const content=footer.querySelector('.footer-inner');
+ // Tall desktop viewports still finish at the copyright, without an empty strip.
+ const bottomGap=Math.max(0,viewport-(footerTop+content.offsetHeight+4*density));
+ groundTop+=bottomGap;footerTop+=bottomGap;
  scene.style.setProperty('--footer-copy-top',footerTop+'px');
  scene.style.setProperty('--ground-top',groundTop+'px');
- // End immediately after the copyright, keeping it above the lower blur band.
- sceneHeight=footerTop+content.offsetHeight+4;
- groundHeight=Math.max(360,sceneHeight-groundTop+100);
+ sceneHeight=footerTop+content.offsetHeight+4*density;
+ groundHeight=Math.max(360*density,sceneHeight-groundTop+100*density);
  scene.style.setProperty('--ground-height',groundHeight+'px');
  // Reserve the ending's height before entry: reveal must never clamp scrollY.
  const height=Math.max(viewport,books.offsetHeight,sceneHeight);
  scene.style.height=height+'px';
  info.style.height=height+'px';
  positionFlowers();
- const cat=footer.querySelector('.garden-cat'),catWidth=compact?154:Math.min(290,Math.max(220,innerWidth*.11));
+ const cat=footer.querySelector('.garden-cat'),catWidth=compact?154:Math.min(290*density,Math.max(220*density,innerWidth*.11));
  const catHeight=catWidth*290/320;
  cat.style.width=catWidth+'px';cat.style.height=catHeight+'px';
  const catX=scene.clientWidth*(compact?.035:.045);
  cat.style.left=catX+'px';
- cat.style.top=(horizon((catX+catWidth*.62)/scene.clientWidth)-catHeight*.915+14)+'px';
+ cat.style.top=(horizon((catX+catWidth*.62)/scene.clientWidth)-catHeight*.915+14*density)+'px';
  draw(progress);
 }
 function draw(p){
@@ -132,17 +137,18 @@ function draw(p){
   plant.style.setProperty('--bloom-opacity',clamp(t*2));
  });
 }
+function finishReveal(){frame=0;playing=false;scene.dataset.state='open';window.dispatchEvent(new Event('simsim:garden-open'))}
 function tick(now){
  progress=clamp((now-startedAt)/duration);draw(progress);
  if(progress<1)frame=requestAnimationFrame(tick);
- else{frame=0;playing=false;scene.dataset.state='open'}
+ else finishReveal()
 }
 function reveal(){
  if(revealed)return;
  revealed=true;playing=true;scene.dataset.state='playing';layout();
  ambientLast=0;if(!ambientFrame)ambientFrame=requestAnimationFrame(ambient);
  startedAt=performance.now();
- if(reduced.matches){progress=1;draw(1);playing=false;scene.dataset.state='open'}
+ if(reduced.matches){progress=1;draw(1);finishReveal()}
  else frame=requestAnimationFrame(tick);
 }
 function reset(){
@@ -155,9 +161,10 @@ window.addEventListener('resize',layout);
 window.addEventListener('simsim:layout',layout);
 window.addEventListener('simsim:opened',layout);
 document.addEventListener('visibilitychange',()=>draw(progress));
-reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;playing=false;draw(1)}});
+reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;draw(1);finishReveal()}});
 document.fonts.ready.then(layout);
-new ResizeObserver(layout).observe(document.querySelector('#books .introduction'));
+const footerObserver=new ResizeObserver(layout);
+footerObserver.observe(document.querySelector('#books .introduction'));footerObserver.observe(footer.querySelector('.footer-inner'));
 layout();
 footer.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
  const destination=link.getAttribute('href');

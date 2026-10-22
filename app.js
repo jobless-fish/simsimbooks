@@ -97,13 +97,13 @@ const clampScroll=y=>Math.max(0,Math.min(y,document.documentElement.scrollHeight
 const sectionStops=()=>pageSections.map(s=>s.getBoundingClientRect().top+scrollY);
 function nearestSection(){const stops=sectionStops();return stops.reduce((best,y,i)=>Math.abs(y-scrollY)<Math.abs(stops[best]-scrollY)?i:best,0)}
 function stopGlide(){cancelAnimationFrame(scrollFrame);scrollFrame=0;snapBusy=false}
-function glideTo(y){
+function glideTo(y,followEnd=false){
  stopGlide();scrollTarget=clampScroll(y);snapBusy=true;
  if(reduced.matches){window.scrollTo(0,scrollTarget);snapBusy=false;return}
  let position=scrollY,velocity=0,last=performance.now();
  function tick(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
-  scrollTarget=clampScroll(scrollTarget);
+  scrollTarget=followEnd?clampScroll(Infinity):clampScroll(scrollTarget);
   const x=position-scrollTarget,omega=12,c=velocity+omega*x,decay=Math.exp(-omega*dt);
   position=scrollTarget+(x+c*dt)*decay;velocity=(velocity-omega*c*dt)*decay;
   if(Math.abs(position-scrollTarget)<.3&&Math.abs(velocity)<3){window.scrollTo(0,scrollTarget);scrollFrame=0;snapBusy=false;return}
@@ -137,9 +137,10 @@ function gardenGesture(delta){
  const garden=window.simsimGarden;
  if(!garden||!inInfoFlow(delta))return false;
  if(garden.playing)return true;
- if(delta>0&&!garden.revealed){garden.reveal();return true}
+ if(delta>0&&!garden.revealed){garden.reveal();glideTo(Infinity,true);return true}
  return false;
 }
+window.addEventListener('simsim:garden-open',()=>{if(inInfoFlow()&&Math.abs(scrollY-clampScroll(Infinity))>1)glideTo(Infinity,true)});
 let wheelLast=-Infinity,wheelOwner=null,wheelAmount=0;
 window.addEventListener('wheel',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||editable(e.target))return;

@@ -105,5 +105,6 @@ function alignTitles(){
  if(changed)window.dispatchEvent(new Event('simsim:layout'));
 }
 for(const title of document.querySelectorAll('#artist h2,#events h2,#books h2,#info .introduction h2'))title.classList.add('aligned-section-title');
-new ResizeObserver(alignTitles).observe(document.querySelector('#bookshop-title'));
+const titleObserver=new ResizeObserver(alignTitles);
+titleObserver.observe(document.querySelector('#bookshop-title'));titleObserver.observe(document.querySelector('#about .introduction'));
 window.addEventListener('resize',alignTitles);window.addEventListener('simsim:opened',alignTitles);document.fonts.ready.then(alignTitles);alignTitles();render(false);
