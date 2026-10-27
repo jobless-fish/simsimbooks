@@ -89,3 +89,10 @@ for(const title of document.querySelectorAll('#artist h2,#events h2,#books h2,#i
 const titleObserver=new ResizeObserver(alignTitles);
 titleObserver.observe(document.querySelector('#bookshop-title'));titleObserver.observe(document.querySelector('#about .introduction'));
 window.addEventListener('resize',alignTitles);window.addEventListener('simsim:opened',alignTitles);document.fonts.ready.then(alignTitles);alignTitles();render(false);
+
+const mobileControls=document.createElement('div');mobileControls.className='mobile-people-controls';mobileControls.setAttribute('aria-label','책방지기 소개 넘기기');
+for(const [direction,label] of [[-1,'이전'],[1,'다음']]){const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',()=>window.simsimPeople.move(direction));mobileControls.append(button)}section.querySelector(".people-section").append(mobileControls);
+function syncMobileControls(){mobileControls.children[0].disabled=state.index===0;mobileControls.children[1].disabled=state.index===2}
+new MutationObserver(syncMobileControls).observe(counter,{childList:true});syncMobileControls();
+
+const phoneLayout=matchMedia('(max-width:760px)');const scrollNote=section.querySelector('.people-scroll-note');const originalNote=scrollNote.textContent;function updatePhoneNote(){scrollNote.textContent=phoneLayout.matches?'아래 버튼으로 두 사람을 만나보세요':originalNote}phoneLayout.addEventListener('change',updatePhoneNote);updatePhoneNote();

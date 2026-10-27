@@ -361,3 +361,52 @@ body.poster-is-open{overflow:hidden!important}
 .info-map img{object-position:center bottom;transform-origin:58% 70%;transform:perspective(900px) translate3d(calc(var(--map-camera,0)*-3%),calc(var(--map-camera,0)*-1%),0) rotateX(calc(var(--map-camera,0)*30deg)) rotateZ(calc(var(--map-camera,0)*-14deg)) scale(calc(1 + var(--map-camera,0)*.32));will-change:transform}
 @media(max-width:760px){.info-map img{transform:perspective(700px) rotateX(calc(var(--map-camera,0)*22deg)) rotateZ(calc(var(--map-camera,0)*-10deg)) scale(calc(1 + var(--map-camera,0)*.18))}}
 @media(prefers-reduced-motion:reduce){.info-map img{transform:none;will-change:auto}}
+
+/* Phone layout: readable cards and native vertical scrolling, independent of desktop geometry. */
+.mobile-people-controls{display:none}
+@media(max-width:760px){
+ :root{--site-density:1;--dock-size:54px;--dock-left:18px;--dock-top:14px;--section-title-x:24px;--section-title-y:26px;--section-title-size:36px;--section-title-height:44px;--shared-card-top:140px}
+ html{scroll-padding-top:130px}body{overflow-x:hidden}.paper{opacity:.1}
+ .section-nav{left:16px;right:16px;top:82px;padding:5px;gap:0;justify-content:space-between}
+ .section-nav a{font:12px/1 Paperlogy,sans-serif;letter-spacing:-.04em;padding:12px 8px;white-space:nowrap}.nav-pill{top:5px;height:calc(100% - 10px)}
+ .logo-line-blur,.bottom-edge-blur{display:none}
+ .page-section,#artist,#events,#books{min-height:0;padding:140px 16px 24px;align-items:flex-start}
+ .introduction{width:100%;max-width:none;min-height:0;grid-template-columns:minmax(0,1fr);gap:24px;padding:28px 24px 32px;border-radius:28px;backdrop-filter:blur(3px)}
+ #about .title-side{max-width:none;margin:0;padding:0;align-items:flex-start}
+ #about h1{font-size:36px;line-height:1.2;margin:0;letter-spacing:.025em}
+ #about .sunglass-cat{width:112px;height:112px;margin:20px 0 0;transform:none}
+ .copy-side{padding:0;min-width:0}.lead{font-size:17px;line-height:1.85;letter-spacing:0;margin-bottom:18px}.details{font-size:14px;line-height:1.85;letter-spacing:0}
+ .aligned-section-title{font-size:36px!important;line-height:1.2!important}
+ .people-section{padding:94px 24px 32px;--people-art-size:170px}
+ .people-stage,.people-slide{min-height:0}.people-stage{height:auto!important}
+ .people-slide{display:flex;flex-direction:column;gap:18px;min-height:380px;justify-content:flex-start}
+ .people-book{display:none}.people-photo{padding:0}.people-photo img{height:170px;width:100%;object-fit:cover;border-radius:14px}
+ .people-portrait{height:170px;padding:0}.people-portrait>svg{max-height:170px}
+ .people-copy,.people-photo-slide .people-copy{width:100%;padding:0;left:0;position:relative;align-self:stretch}
+ .people-copy h3{font-size:24px;line-height:1.4;margin-bottom:12px}.people-intro,.people-bio{font-size:14px;line-height:1.85}.people-eyebrow,.people-scroll-note{font-size:11px}.bio-line{white-space:normal}.people-bio-copy{max-height:none;overflow:visible}
+ .people-step{bottom:25px;right:24px;font-size:11px}.mobile-people-controls{display:flex;gap:10px;margin-top:24px;padding-right:60px}
+ .mobile-people-controls button{font:13px Paperlogy,sans-serif;min-height:42px;padding:8px 14px;border:1px solid #004bec30;border-radius:24px;background:#ffffffa8;color:var(--blue)}.mobile-people-controls button:disabled{opacity:.35}
+ #events .events-section{height:620px!important;padding:94px 20px 26px;width:100%!important}
+ #events .events-heading{padding:0;margin-bottom:18px;flex-shrink:0}.events-heading>div:first-child>p{font-size:12px}.events-scroll-guide{font-size:10px;max-width:130px}
+ #events .event-track{flex:1;min-height:0}#events .event-card{height:100%;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:20px}
+ #events .event-poster{height:100%;max-height:210px}#events .event-copy{font-size:14px;padding-right:6px}.event-copy h3{font-size:21px}
+ .event-poster-lightbox,.event-poster-lightbox img{max-width:92vw;max-height:82svh}
+ #books .books-section{padding:94px 20px 28px}.books-heading{padding:0;margin:0}.book-track{padding-top:12px;gap:16px}.book-cover,#books .book-cover{flex:0 0 76%;min-width:0}.book-title{font-size:13px}
+ #info{padding:0;min-height:0}#info .info-scene>.introduction{padding:90px 24px 28px;display:flex;flex-direction:column;gap:20px;min-height:0}
+ #info .future-section .title-side{width:100%;height:auto;padding:0}
+ #info .info-map{position:relative;left:auto;top:auto;bottom:auto;width:100%;height:205px;margin:0;flex:none}
+ .info-map img{object-position:center;transform-origin:center;will-change:auto;transform:perspective(700px) rotateX(calc(var(--map-camera,0)*14deg)) rotateZ(calc(var(--map-camera,0)*-6deg)) scale(calc(1 + var(--map-camera,0)*.08))}
+ #info .future-section .copy-side{width:100%;padding:0}.visit-route,#info .visit-route{font-size:14px;line-height:1.85;margin:12px 0}.visit-route br{display:none}#info .visit-reservation-note{font-size:13px;margin-bottom:18px}
+ #info .visit-actions{gap:10px;justify-content:flex-end}#info .visit-actions a{font-size:12px;min-height:44px;padding:10px 14px}
+ #info .footer-inner{padding:0 24px 12px;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:24px}
+ #info .footer-brand{grid-column:1/-1}#info .footer-brand h2{font-size:36px;line-height:1.2;margin:12px 0}.footer-description{font-size:12px}#info .footer-connect{justify-self:start}
+ #info .footer-menu a,#info .footer-connect a{font-size:12px;min-height:32px}#info .footer-kicker,#info .footer-label{font-size:10px}.neighbors-marquee{grid-column:1/-1;margin:0;padding:10px 0 44px;--neighbor-size:48px;--neighbor-gap:24px}
+ #info .footer-bottom{left:0;right:0;bottom:5px;padding:0;font-size:10px}.footer-actions a{min-height:32px;display:inline-flex;align-items:center}
+ .scenery{transition:opacity 1s,transform 2s}.landscape-loaded .scenery{filter:none}.scenery img{object-position:50% center}
+}
+@media(max-width:360px){.section-nav a{font-size:11px;padding:12px 6px}.introduction{padding-left:20px;padding-right:20px}#about h1{font-size:32px}#info .info-map{height:180px}}
+
+@media(max-width:760px){.book-track,.event-track{touch-action:pan-x pan-y;overscroll-behavior-x:contain}}
+
+@media(max-width:760px){#info .footer-brand h2 br{display:revert}}
+@media(max-width:760px){#events .event-track .event-copy{overscroll-behavior-y:auto}}

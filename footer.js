@@ -55,7 +55,7 @@ function horizon(x){
  let target=Math.min(x,1-x)*1440,lo=0,hi=1;
  const bez=(t,a,b,c,d)=>a*(1-t)**3+3*b*(1-t)**2*t+3*c*(1-t)*t*t+d*t*t*t;
  for(let i=0;i<20;i++){const t=(lo+hi)/2;if(bez(t,-50,220,430,720)<target)lo=t;else hi=t}
- return groundTop+bez((lo+hi)/2,110,16,0,0)*groundHeight/500;
+ return groundTop+bez((lo+hi)/2,scene.clientWidth<=760?24:110,scene.clientWidth<=760?4:16,0,0)*groundHeight/500;
 }
 let horizonSamples=[];
 function cacheHorizon(){horizonSamples=Array.from({length:257},(_,i)=>horizon(i/256))}
@@ -78,7 +78,20 @@ function layout(){
  density=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-density'))||1;
  flowers.forEach(({plant,width,height})=>{plant.style.width=width*density+'px';plant.style.height=(height+28)*density+'px'});
  const viewport=document.documentElement.clientHeight;
- const compact=innerWidth<=640;
+ const compact=innerWidth<=760;
+ footer.querySelector(".garden-ground>path").setAttribute("d",compact?"M-50 24 C220 4 430 0 720 0 C1010 0 1220 4 1490 24 V550 H-50 Z":"M-50 110 C220 16 430 0 720 0 C1010 0 1220 16 1490 110 V550 H-50 Z");
+ if(compact){
+  flowers.forEach(({plant,width,height})=>{plant.style.width=width*.72+"px";plant.style.height=(height+28)*.72+"px"});
+  const cardTop=140;card.style.left="16px";card.style.width=(scene.clientWidth-32)+"px";card.style.height="auto";
+  initialCardHeight=finalCardHeight=card.offsetHeight;cardShift=0;
+  scene.style.setProperty("--info-card-top",cardTop+"px");
+  groundTop=cardTop+initialCardHeight+78;const footerTop=groundTop+72;const content=footer.querySelector(".footer-inner");
+  sceneHeight=footerTop+content.offsetHeight+20;groundHeight=Math.max(400,sceneHeight-groundTop+80);
+  scene.style.setProperty("--ground-top",groundTop+"px");scene.style.setProperty("--ground-height",groundHeight+"px");scene.style.setProperty("--footer-copy-top",footerTop+"px");
+  scene.style.height=info.style.height=sceneHeight+"px";
+  cacheHorizon();positionFlowers();const cat=footer.querySelector(".garden-cat"),catWidth=126,catHeight=catWidth*290/320,catX=scene.clientWidth*.04;
+  cat.style.width=catWidth+"px";cat.style.height=catHeight+"px";cat.style.left=catX+"px";cat.style.top=(horizon((catX+catWidth*.62)/scene.clientWidth)-catHeight*.915+14)+"px";draw(progress);return;
+ }
  const books=document.querySelector('#books');
  const bookCard=books.querySelector('.introduction'),bookStyle=getComputedStyle(books);
  // Use layout dimensions, not the intro's transient translate/scale transform.
