@@ -82,7 +82,7 @@ function layout(){
  footer.querySelector(".garden-ground>path").setAttribute("d",compact?"M-50 24 C220 4 430 0 720 0 C1010 0 1220 4 1490 24 V550 H-50 Z":"M-50 110 C220 16 430 0 720 0 C1010 0 1220 16 1490 110 V550 H-50 Z");
  if(compact){
   flowers.forEach(({plant,width,height})=>{plant.style.width=width*.72+"px";plant.style.height=(height+28)*.72+"px"});
-  const cardTop=140;card.style.left="16px";card.style.width=(scene.clientWidth-32)+"px";card.style.height="auto";
+  const mobileSpacing=getComputedStyle(document.querySelector("#about")),cardTop=parseFloat(mobileSpacing.paddingTop),gutter=parseFloat(mobileSpacing.paddingLeft);card.style.left=gutter+"px";card.style.width=(scene.clientWidth-gutter*2)+"px";card.style.height="auto";
   initialCardHeight=finalCardHeight=card.offsetHeight;cardShift=0;
   scene.style.setProperty("--info-card-top",cardTop+"px");
   groundTop=cardTop+initialCardHeight+78;const footerTop=groundTop+72;const content=footer.querySelector(".footer-inner");
