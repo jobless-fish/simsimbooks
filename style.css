@@ -519,3 +519,11 @@ body.poster-is-open{overflow:hidden!important}
 @keyframes phone-card-fade-out{to{opacity:0}}
 @keyframes phone-card-fade-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.phone-paging #events .event-card>.event-poster,.phone-paging #events .event-card>.event-copy{transition:none}html[data-phone-transition=fade]::view-transition-old(phone-card),html[data-phone-transition=fade]::view-transition-new(phone-card){animation:none}}
+
+/* Portrait drawing must not reserve hidden biography space or create a scrollbar. */
+@media(max-width:760px){
+ .phone-paging .people-slide[data-person-step="1"],.phone-paging .people-slide[data-person-step="2"]{overflow:hidden}
+ .phone-paging .people-slide:not(.is-written) .people-bio-copy{display:none}
+ .phone-paging .is-written .people-bio-copy{display:block}
+ .phone-paging .people-bio-copy{transform:none;transition:opacity .5s ease}
+}

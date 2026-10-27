@@ -399,6 +399,7 @@ function phoneChangeMode(direction){return phoneSection===0&&((direction>0&&!pho
 function slidePhone(change,direction=1,mode="slide"){
  if(!phoneQuery.matches||reduced.matches||body.dataset.stage!=='open'){change();return}
  if(phoneSlideBusy)return;phoneSlideBusy=true;
+ if(mode==="fade"){fadePhoneContent(change);return}
  document.documentElement.style.setProperty('--phone-slide-direction',String(direction));
  document.documentElement.dataset.phoneTransition=mode;
  if(document.startViewTransition){
@@ -425,17 +426,18 @@ function syncPhoneBookControls(){
 for(const [button,direction] of [[phoneBookControls.children[0],-1],[phoneBookControls.children[2],1]])button.addEventListener('click',()=>{
  const current=bookFrame?bookTarget:bookTrack.scrollLeft;
  const index=Math.max(0,Math.min(phoneBooks.length-1,Math.round(current/phoneBookStep())+direction));
- fadePhoneBook(index);
+ moveBooks(clampBook(index*phoneBookStep())-current);
 });
 bookTrack.addEventListener('scroll',syncPhoneBookControls,{passive:true});window.addEventListener('simsim:phone-layout',syncPhoneBookControls);window.addEventListener('resize',syncPhoneBookControls);syncPhoneBookControls();
 
-let phoneBookFading=false;
-async function fadePhoneBook(index){
- if(phoneBookFading)return;phoneBookFading=true;stopBooks();
+
+async function fadePhoneContent(change){
+ const selector=phoneSection===0?'.phone-active .copy-side':'.phone-active .people-stage';
+ const previous=document.querySelector(selector);let out;
  try{
-  if(!reduced.matches)await bookTrack.animate([{opacity:1},{opacity:0}],{duration:150,fill:'forwards'}).finished;
-  bookTrack.scrollLeft=clampBook(index*phoneBookStep());bookTarget=bookTrack.scrollLeft;syncPhoneBookControls();
-  for(const animation of bookTrack.getAnimations())animation.cancel();
-  if(!reduced.matches)await bookTrack.animate([{opacity:0},{opacity:1}],{duration:260,easing:'ease-out'}).finished;
- }catch{}finally{phoneBookFading=false}
+  if(previous){out=previous.animate([{opacity:1},{opacity:0}],{duration:160,fill:'forwards'});await out.finished}
+  change();out?.cancel();
+  const next=document.querySelector(selector);
+  if(next)await next.animate([{opacity:0},{opacity:1}],{duration:300,easing:'ease-out'}).finished;
+ }catch{out?.cancel()}finally{phoneSlideBusy=false}
 }

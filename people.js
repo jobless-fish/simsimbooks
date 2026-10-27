@@ -36,7 +36,7 @@ function clearMotion(){
  epoch++;for(const animation of animations)animation.cancel();animations.clear();
 }
 function animate(el,keyframes,options){const animation=el.animate(keyframes,options);animations.add(animation);animation.finished.catch(()=>{});return animation}
-function written(slide){slide.classList.add('is-written');window.dispatchEvent(new Event("simsim:phone-person"))}
+function written(slide){slide.classList.add('is-written');if(matchMedia('(max-width:760px)').matches&&!reduced.matches)slide.querySelector('.people-bio-copy')?.animate([{opacity:0},{opacity:1}],{duration:500,easing:'ease-out'});window.dispatchEvent(new Event("simsim:phone-person"))}
 async function draw(slide){
  const name=slide.querySelector('[data-portrait]')?.dataset.portrait;if(!name)return;
  const data=portraits.get(name)||createPortrait(name),token=epoch;slide.classList.remove('is-written');data.host.dataset.drawPhase='lines';
