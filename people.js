@@ -36,7 +36,7 @@ function clearMotion(){
  epoch++;for(const animation of animations)animation.cancel();animations.clear();
 }
 function animate(el,keyframes,options){const animation=el.animate(keyframes,options);animations.add(animation);animation.finished.catch(()=>{});return animation}
-function written(slide){slide.classList.add('is-written')}
+function written(slide){slide.classList.add('is-written');window.dispatchEvent(new Event("simsim:phone-person"))}
 async function draw(slide){
  const name=slide.querySelector('[data-portrait]')?.dataset.portrait;if(!name)return;
  const data=portraits.get(name)||createPortrait(name),token=epoch;slide.classList.remove('is-written');data.host.dataset.drawPhase='lines';

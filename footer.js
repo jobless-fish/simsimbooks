@@ -85,11 +85,12 @@ function layout(){
   const mobileSpacing=getComputedStyle(document.querySelector("#about")),cardTop=parseFloat(mobileSpacing.paddingTop),gutter=parseFloat(mobileSpacing.paddingLeft);card.style.left=gutter+"px";card.style.width=(scene.clientWidth-gutter*2)+"px";card.style.height="auto";
   initialCardHeight=finalCardHeight=card.offsetHeight;cardShift=0;
   scene.style.setProperty("--info-card-top",cardTop+"px");
-  groundTop=cardTop+initialCardHeight+78;const footerTop=groundTop+72;const content=footer.querySelector(".footer-inner");
-  sceneHeight=footerTop+content.offsetHeight+20;groundHeight=Math.max(400,sceneHeight-groundTop+80);
+  const phoneGarden=document.body.classList.contains("phone-garden"),phonePaged=document.body.classList.contains("phone-paging");
+  groundTop=phoneGarden?190:cardTop+initialCardHeight+78;const footerTop=phoneGarden?220:groundTop+72;const content=footer.querySelector(".footer-inner");
+  sceneHeight=phonePaged?viewport:footerTop+content.offsetHeight+20;groundHeight=Math.max(400,sceneHeight-groundTop+80);
   scene.style.setProperty("--ground-top",groundTop+"px");scene.style.setProperty("--ground-height",groundHeight+"px");scene.style.setProperty("--footer-copy-top",footerTop+"px");
   scene.style.height=info.style.height=sceneHeight+"px";
-  cacheHorizon();positionFlowers();const cat=footer.querySelector(".garden-cat"),catWidth=126,catHeight=catWidth*290/320,catX=scene.clientWidth*.04;
+  cacheHorizon();positionFlowers();const cat=footer.querySelector(".garden-cat"),catWidth=phoneGarden?90:126,catHeight=catWidth*290/320,catX=scene.clientWidth*.04;
   cat.style.width=catWidth+"px";cat.style.height=catHeight+"px";cat.style.left=catX+"px";cat.style.top=(horizon((catX+catWidth*.62)/scene.clientWidth)-catHeight*.915+14)+"px";draw(progress);return;
  }
  const books=document.querySelector('#books');
@@ -182,6 +183,7 @@ window.simsimGarden={reveal,reset,get revealed(){return revealed},get playing(){
 window.addEventListener('resize',layout);
 window.addEventListener('simsim:layout',layout);
 window.addEventListener('simsim:opened',layout);
+window.addEventListener('simsim:phone-layout',layout);
 document.addEventListener('visibilitychange',()=>{draw(progress);syncActivity()});
 reduced.addEventListener('change',()=>{if(reduced.matches&&playing){cancelAnimationFrame(frame);progress=1;draw(1);finishReveal()}});
 document.fonts.ready.then(layout);

@@ -59,6 +59,7 @@ const pageSections=[...document.querySelectorAll('.page-section')];
 let navFrame=0;
 function updatePill(){
  navFrame=0;
+ if(document.body.classList.contains("phone-paging")&&window.simsimPhone){renderPhone();return}
  updateScrollIndicator();
  updateSectionMotion();
  // Use rendered scroll position, never the clicked destination or wheel target.
@@ -113,6 +114,7 @@ function glideTo(y,followEnd=false){
  scrollFrame=requestAnimationFrame(tick);
 }
 function snapToSection(index,viaNav=false){
+ if(mobileLayout()&&window.simsimPhone){stopGlide();window.simsimPhone.go(index);return}
  const previous=nearestSection();snapAnchor=Math.max(0,Math.min(index,pageSections.length-1));
  if(pageSections[snapAnchor].id==='artist'&&(previous!==snapAnchor||viaNav))window.simsimPeople?.enter(viaNav||snapAnchor>previous?0:2);
  if(pageSections[snapAnchor].id!=='info'&&window.simsimGarden?.revealed)window.simsimGarden.reset();
@@ -149,7 +151,7 @@ window.addEventListener('wheel',e=>{
  if(body.dataset.stage!=='open'||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||editable(e.target))return;
  const now=performance.now(),fresh=now-wheelLast>320;wheelLast=now;
  if(fresh){wheelOwner=null;wheelAmount=0}
- if(mobileLayout()){if(e.deltaY>0&&fresh&&mobileGardenReady())window.simsimGarden?.reveal();return}
+ if(mobileLayout()){if(!e.target.closest('.event-copy,.people-bio,.footer-inner'))e.preventDefault();return}
  const delta=(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)*(e.deltaMode===1?18:e.deltaMode===2?innerHeight:1);
  if(!delta)return;
  if(!snapBusy&&inInfoFlow(delta)){
@@ -178,7 +180,7 @@ window.addEventListener('touchstart',e=>{
 },{passive:true,capture:true});
 window.addEventListener('touchmove',e=>{
  const g=sectionTouch;if(!g||e.touches.length!==1)return;
- if(g.mobile){if(g.ready&&g.y-e.touches[0].clientY>30){window.simsimGarden?.reveal();g.ready=false}return}
+ if(g.mobile){if(!e.target.closest('.event-copy,.people-bio,.footer-inner')&&e.cancelable)e.preventDefault();return}
  const t=e.touches[0],dx=g.x-t.clientX,dy=g.y-t.clientY,step=g.lastY-t.clientY;g.lastY=t.clientY;
  if(g.owner==='garden'||g.owner==='people'){if(e.cancelable)e.preventDefault();return}
  if(g.owner==='native')return;
@@ -354,3 +356,39 @@ window.addEventListener('pageshow',()=>{
  window.scrollTo({top:0,left:0,behavior:'instant'});
  queuePill();
 });
+
+// Phone pages use explicit controls rather than scroll-driven section changes.
+const phoneQuery=matchMedia('(max-width:760px)');
+let phoneSection=0,phoneAboutMore=false,phoneGarden=false;
+const phonePager=document.createElement('nav');phonePager.className='phone-pager';phonePager.setAttribute('aria-label','모바일 화면 이동');
+phonePager.innerHTML='<button type="button" class="phone-previous" aria-label="이전 화면"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button><output class="phone-page-label" aria-live="polite"></output><button type="button" class="phone-next" aria-label="다음 화면"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 10 6 6 6-6"/></svg></button>';body.append(phonePager);
+function renderPhone(){
+ if(!phoneQuery.matches)return;
+ stopGlide();body.classList.add('phone-paging');body.classList.toggle('phone-about-more',phoneAboutMore);body.classList.toggle('phone-garden',phoneGarden);
+ pageSections.forEach((section,i)=>section.classList.toggle('phone-active',i===phoneSection));
+ window.scrollTo({top:0,left:0,behavior:'instant'});
+ const names=['심심한책방','책방지기','행사','책들','방문 안내'];
+ phonePager.querySelector('output').textContent=phoneGarden?'꽃밭에서 또 만나요':names[phoneSection]+(phoneSection===0?(phoneAboutMore?' · 2 / 2':' · 1 / 2'):phoneSection===1?' · '+((window.simsimPeople?.index||0)+1)+' / 3':'');
+ phonePager.querySelector('.phone-previous').disabled=phoneSection===0&&!phoneAboutMore;
+ phonePager.querySelector('.phone-next').disabled=phoneSection===1&&(window.simsimPeople?.index||0)>0&&!document.querySelector('.people-slide.is-current')?.classList.contains('is-written');
+ phonePager.querySelector('.phone-next').setAttribute('aria-label',phoneGarden?'처음 화면으로':'다음 화면');
+ phonePager.querySelector('.phone-next').classList.toggle('is-home',phoneGarden);
+ navLinks.forEach((link,i)=>{if(i===phoneSection)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');link.style.removeProperty('color')});
+ const link=navLinks[phoneSection];pill.style.width=link.offsetWidth+'px';pill.style.transform='translateX('+link.offsetLeft+'px)';
+ window.dispatchEvent(new Event('simsim:phone-layout'));
+}
+window.simsimPhone={go(index){phoneSection=Math.max(0,Math.min(pageSections.length-1,index));phoneAboutMore=false;phoneGarden=false;window.simsimGarden?.reset();if(phoneSection===1)window.simsimPeople?.enter(0);renderPhone()}};
+function advancePhone(direction){
+ if(phoneGarden){phoneGarden=false;if(direction>0){phoneSection=0;phoneAboutMore=false}window.simsimGarden?.reset();renderPhone();return}
+ if(phoneSection===0){if(direction>0&&!phoneAboutMore){phoneAboutMore=true;renderPhone();return}if(direction<0&&phoneAboutMore){phoneAboutMore=false;renderPhone();return}}
+ if(phoneSection===1&&window.simsimPeople?.canMove(direction)){window.simsimPeople.move(direction);renderPhone();return}
+ if(phoneSection===4&&direction>0){phoneGarden=true;renderPhone();window.simsimGarden?.reveal();return}
+ phoneSection=Math.max(0,Math.min(4,phoneSection+direction));phoneAboutMore=phoneSection===0&&direction<0;
+ if(phoneSection===1)window.simsimPeople?.enter(direction<0?2:0);renderPhone();
+}
+phonePager.querySelector('.phone-next').addEventListener('click',()=>advancePhone(1));phonePager.querySelector('.phone-previous').addEventListener('click',()=>advancePhone(-1));
+window.addEventListener('simsim:opened',renderPhone);window.addEventListener('resize',()=>{if(phoneQuery.matches)renderPhone()});
+phoneQuery.addEventListener('change',()=>{body.classList.toggle('phone-paging',phoneQuery.matches);if(phoneQuery.matches){phoneSection=0;phoneAboutMore=false;phoneGarden=false;renderPhone()}else{body.classList.remove('phone-about-more','phone-garden');pageSections.forEach(s=>s.classList.remove('phone-active'));window.simsimGarden?.reset();queuePill()}});
+window.addEventListener('simsim:phone-person',renderPhone);if(phoneQuery.matches)renderPhone();
+
+window.addEventListener('pageshow',()=>{if(phoneQuery.matches)window.simsimPhone.go(0)});
