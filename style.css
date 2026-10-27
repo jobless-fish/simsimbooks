@@ -494,3 +494,28 @@ body.poster-is-open{overflow:hidden!important}
 @keyframes phone-slide-out{to{transform:translateY(calc(var(--phone-slide-direction,1)*-110%));opacity:0}}
 @keyframes phone-slide-in{from{transform:translateY(calc(var(--phone-slide-direction,1)*110%));opacity:.2}to{transform:translateY(0);opacity:1}}
 @media(prefers-reduced-motion:reduce){::view-transition-old(phone-card),::view-transition-new(phone-card),::view-transition-group(phone-card){animation:none!important}}
+
+.event-flip-back,.event-phone-registration{display:none}
+@media(max-width:760px){
+ .phone-paging #events .events-scroll-guide,.phone-paging #events .events-heading p{display:none}
+ .phone-paging #events .events-heading{margin:0;min-height:0;height:0}
+ .phone-paging #events .event-track{perspective:1100px;overflow-y:hidden}
+ .phone-paging #events .event-card{display:block;position:relative;perspective:1100px;isolation:isolate}
+ .phone-paging #events .event-card>.event-poster,.phone-paging #events .event-card>.event-copy{position:absolute;inset:0;width:100%;height:100%!important;max-height:100%!important;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .7s cubic-bezier(.2,.7,.2,1),visibility 0s .35s;transform-origin:center}
+ .phone-paging #events .event-card>.event-poster{display:flex;align-items:center;justify-content:center;transform:rotateY(0);visibility:visible}
+ .phone-paging #events .event-card>.event-copy{padding:18px;background:#fffc;border-radius:16px;transform:rotateY(180deg);visibility:hidden;overflow:auto;overscroll-behavior:contain;box-sizing:border-box}
+ .phone-paging #events .event-card.is-flipped>.event-poster{transform:rotateY(-180deg);visibility:hidden}
+ .phone-paging #events .event-card.is-flipped>.event-copy{transform:rotateY(0);visibility:visible}
+ .phone-paging #events .event-poster-frame{max-width:100%;width:100%;height:100%;display:block}
+ .phone-paging #events .event-poster-zoom{width:100%;height:100%;display:block}
+ .phone-paging #events .event-poster-zoom img{height:100%;width:100%;max-height:100%;object-fit:contain;object-position:center}
+ .phone-paging #events .event-poster-frame>.event-link{display:none}
+ .phone-paging .event-flip-back{display:inline-flex;align-items:center;min-height:38px;border:0;background:transparent;color:var(--blue);padding:0 0 10px;font:12px Paperlogy,sans-serif;cursor:pointer}
+ .phone-paging .event-phone-registration{display:inline-block;font-size:12px;margin:8px 0}
+ html[data-phone-transition=fade]::view-transition-old(phone-card){animation:phone-card-fade-out .2s ease both}
+ html[data-phone-transition=fade]::view-transition-new(phone-card){animation:phone-card-fade-in .35s .1s ease both}
+ html[data-phone-transition=fade]::view-transition-group(phone-card){animation-duration:.4s}
+}
+@keyframes phone-card-fade-out{to{opacity:0}}
+@keyframes phone-card-fade-in{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.phone-paging #events .event-card>.event-poster,.phone-paging #events .event-card>.event-copy{transition:none}html[data-phone-transition=fade]::view-transition-old(phone-card),html[data-phone-transition=fade]::view-transition-new(phone-card){animation:none}}

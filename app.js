@@ -377,7 +377,7 @@ function renderPhone(){
  const link=navLinks[phoneSection];pill.style.width=link.offsetWidth+'px';pill.style.transform='translateX('+link.offsetLeft+'px)';
  window.dispatchEvent(new Event('simsim:phone-layout'));
 }
-window.simsimPhone={go(index){slidePhone(()=>goPhoneSection(index),index>=phoneSection?1:-1)}};
+window.simsimPhone={go(index){slidePhone(()=>goPhoneSection(index),index>=phoneSection?1:-1,index===phoneSection?'fade':'slide')}};
 function goPhoneSection(index){phoneSection=Math.max(0,Math.min(pageSections.length-1,index));phoneAboutMore=false;phoneGarden=false;window.simsimGarden?.reset();if(phoneSection===1)window.simsimPeople?.enter(0);renderPhone()}
 function advancePhone(direction){
  if(phoneGarden){phoneGarden=false;if(direction>0){phoneSection=0;phoneAboutMore=false}window.simsimGarden?.reset();renderPhone();return}
@@ -387,7 +387,7 @@ function advancePhone(direction){
  phoneSection=Math.max(0,Math.min(4,phoneSection+direction));phoneAboutMore=phoneSection===0&&direction<0;
  if(phoneSection===1)window.simsimPeople?.enter(direction<0?2:0);renderPhone();
 }
-phonePager.querySelector('.phone-next').addEventListener('click',()=>slidePhone(()=>advancePhone(1),1));phonePager.querySelector('.phone-previous').addEventListener('click',()=>slidePhone(()=>advancePhone(-1),-1));
+phonePager.querySelector('.phone-next').addEventListener('click',()=>slidePhone(()=>advancePhone(1),1,phoneChangeMode(1)));phonePager.querySelector('.phone-previous').addEventListener('click',()=>slidePhone(()=>advancePhone(-1),-1,phoneChangeMode(-1)));
 window.addEventListener('simsim:opened',renderPhone);window.addEventListener('resize',()=>{if(phoneQuery.matches)renderPhone()});
 phoneQuery.addEventListener('change',()=>{body.classList.toggle('phone-paging',phoneQuery.matches);if(phoneQuery.matches){phoneSection=0;phoneAboutMore=false;phoneGarden=false;renderPhone()}else{body.classList.remove('phone-about-more','phone-garden');pageSections.forEach(s=>s.classList.remove('phone-active'));window.simsimGarden?.reset();queuePill()}});
 window.addEventListener('simsim:phone-person',renderPhone);if(phoneQuery.matches)renderPhone();
@@ -395,17 +395,19 @@ window.addEventListener('simsim:phone-person',renderPhone);if(phoneQuery.matches
 window.addEventListener('pageshow',()=>{if(phoneQuery.matches)goPhoneSection(0)});
 
 let phoneSlideBusy=false;
-function slidePhone(change,direction=1){
+function phoneChangeMode(direction){return phoneSection===0&&((direction>0&&!phoneAboutMore)||(direction<0&&phoneAboutMore))||phoneSection===1&&window.simsimPeople?.canMove(direction)?'fade':'slide'}
+function slidePhone(change,direction=1,mode="slide"){
  if(!phoneQuery.matches||reduced.matches||body.dataset.stage!=='open'){change();return}
  if(phoneSlideBusy)return;phoneSlideBusy=true;
  document.documentElement.style.setProperty('--phone-slide-direction',String(direction));
+ document.documentElement.dataset.phoneTransition=mode;
  if(document.startViewTransition){
   const transition=document.startViewTransition(()=>change());
   transition.finished.catch(()=>{}).finally(()=>{phoneSlideBusy=false});
  }else{
   change();const card=document.querySelector('.phone-active .introduction');
   if(!card){phoneSlideBusy=false;return}
-  card.animate([{transform:'translateY('+(direction*80)+'px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:540,easing:'cubic-bezier(.22,.7,.2,1)'}).finished.catch(()=>{}).finally(()=>{phoneSlideBusy=false});
+  card.animate(mode==='fade'?[{opacity:0},{opacity:1}]:[{transform:'translateY('+(direction*80)+'px)',opacity:0},{transform:'translateY(0)',opacity:1}],{duration:540,easing:'cubic-bezier(.22,.7,.2,1)'}).finished.catch(()=>{}).finally(()=>{phoneSlideBusy=false});
  }
 }
 const phoneBookControls=document.createElement('div');phoneBookControls.className='phone-book-controls';phoneBookControls.setAttribute('aria-label','책 표지 넘기기');
@@ -423,6 +425,17 @@ function syncPhoneBookControls(){
 for(const [button,direction] of [[phoneBookControls.children[0],-1],[phoneBookControls.children[2],1]])button.addEventListener('click',()=>{
  const current=bookFrame?bookTarget:bookTrack.scrollLeft;
  const index=Math.max(0,Math.min(phoneBooks.length-1,Math.round(current/phoneBookStep())+direction));
- moveBooks(clampBook(index*phoneBookStep())-current);
+ fadePhoneBook(index);
 });
 bookTrack.addEventListener('scroll',syncPhoneBookControls,{passive:true});window.addEventListener('simsim:phone-layout',syncPhoneBookControls);window.addEventListener('resize',syncPhoneBookControls);syncPhoneBookControls();
+
+let phoneBookFading=false;
+async function fadePhoneBook(index){
+ if(phoneBookFading)return;phoneBookFading=true;stopBooks();
+ try{
+  if(!reduced.matches)await bookTrack.animate([{opacity:1},{opacity:0}],{duration:150,fill:'forwards'}).finished;
+  bookTrack.scrollLeft=clampBook(index*phoneBookStep());bookTarget=bookTrack.scrollLeft;syncPhoneBookControls();
+  for(const animation of bookTrack.getAnimations())animation.cancel();
+  if(!reduced.matches)await bookTrack.animate([{opacity:0},{opacity:1}],{duration:260,easing:'ease-out'}).finished;
+ }catch{}finally{phoneBookFading=false}
+}

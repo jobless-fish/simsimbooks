@@ -61,7 +61,7 @@ function render(withTransition=true){
  clearMotion();clearTimeout(transitionTimer);
  const index=state.index;slides.forEach((slide,i)=>{slide.hidden=i!==index;slide.setAttribute('aria-hidden',String(i!==index));slide.classList.toggle('is-current',i===index);slide.classList.remove('is-written')});
  const active=slides[index];counter.textContent=`0${index+1} / 03`;
- if(withTransition&&!reduced.matches){state.lock();animate(active,[{opacity:0,transform:'translateY(10px) rotate(-.35deg)'},{opacity:1,transform:'none'}],{duration:620,easing:'cubic-bezier(.2,.75,.2,1)'});transitionTimer=setTimeout(()=>state.unlock(),640)}else state.unlock();
+ if(withTransition&&!reduced.matches){state.lock();animate(active,matchMedia('(max-width:760px)').matches?[{opacity:0},{opacity:1}]:[{opacity:0,transform:'translateY(10px) rotate(-.35deg)'},{opacity:1,transform:'none'}],{duration:620,easing:'cubic-bezier(.2,.75,.2,1)'});transitionTimer=setTimeout(()=>state.unlock(),640)}else state.unlock();
  if(index&&visible)draw(active);
 }
 window.simsimPeople={

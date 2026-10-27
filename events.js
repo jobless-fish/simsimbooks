@@ -26,7 +26,7 @@ function render(){
  for(const e of events){
   const card=node('article','event-card'),visual=node('div','event-poster'),src=posterURL(e.poster,base),frame=node('div','event-poster-frame');visual.append(frame);
   card.setAttribute('aria-label',e.title);
-  if(src){const img=node('img');img.src=src;img.alt=e.title+' 포스터';img.decoding='async';img.loading='lazy';img.draggable=false;img.addEventListener('error',()=>{frame.replaceChildren(node('p','event-image-error','포스터를 불러오지 못했어요.'))},{once:true});const zoom=node('button','event-poster-zoom');zoom.type='button';zoom.setAttribute('aria-label',e.title+' 포스터 크게 보기');zoom.append(img);zoom.addEventListener('click',()=>openPoster(src,e.title,zoom));frame.append(zoom)}else frame.append(node('p','event-image-error','포스터 준비 중'));
+  if(src){const img=node('img');img.src=src;img.alt=e.title+' 포스터';img.decoding='async';img.loading='lazy';img.draggable=false;img.addEventListener('error',()=>{frame.replaceChildren(node('p','event-image-error','포스터를 불러오지 못했어요.'))},{once:true});const zoom=node('button','event-poster-zoom');zoom.type='button';zoom.setAttribute('aria-label',e.title+' 포스터 크게 보기');zoom.append(img);zoom.addEventListener('click',()=>{if(matchMedia('(max-width:760px)').matches)flipEvent(card,true);else openPoster(src,e.title,zoom)});frame.append(zoom)}else frame.append(node('p','event-image-error','포스터 준비 중'));
   const copy=node('div','event-copy');copy.tabIndex=0;copy.setAttribute('aria-label',e.title+' 행사 안내');copy.append(node('span','event-badge',eventState(e)),node('h3','event-name',e.title));
   const dl=node('dl','event-facts');for(const [label,text] of [['일시',eventDate(e.startAt,e.endAt)],['장소',e.location]])dl.append(node('dt','',label),node('dd','',text));
   copy.append(dl,node('p','event-description',e.description));
@@ -34,7 +34,9 @@ function render(){
   copy.addEventListener('pointerdown',event=>event.stopPropagation());
   copy.addEventListener('keydown',event=>{if(copy.scrollHeight>copy.clientHeight+1&&['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))event.stopPropagation()});
   const href=safeLink(e.registrationUrl);if(href){const a=node('a','event-link','행사 신청하기 ↗');a.href=href;a.target='_blank';a.rel='noopener noreferrer';frame.append(a)}
-  card.append(visual,copy);content.append(card);
+  const back=node('button','event-flip-back','‹ 포스터로 돌아가기');back.type='button';back.addEventListener('click',()=>flipEvent(card,false));copy.prepend(back);
+  if(href){const mobileLink=node('a','event-link event-phone-registration','행사 신청하기');mobileLink.href=href;mobileLink.target='_blank';mobileLink.rel='noopener noreferrer';copy.append(mobileLink)}
+  card.append(visual,copy);content.append(card);syncEventFace(card);
  }
  count();
 }
@@ -48,3 +50,14 @@ async function load(){
 window.simsimEventShelf={track:content,move:shelf.move};
 retry.addEventListener('click',load);load();
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.code==='KeyE'&&!e.repeat){e.preventDefault();location.assign(new URL('bookroom/',base))}});
+
+const eventPhone=matchMedia('(max-width:760px)');
+function syncEventFace(card){
+ const phone=matchMedia('(max-width:760px)').matches,flipped=phone&&card.classList.contains('is-flipped');
+ const visual=card.querySelector('.event-poster'),copy=card.querySelector('.event-copy'),trigger=card.querySelector('.event-poster-zoom');
+ visual.inert=flipped;copy.inert=phone&&!flipped;
+ if(phone){visual.setAttribute('aria-hidden',String(flipped));copy.setAttribute('aria-hidden',String(!flipped))}else{visual.removeAttribute('aria-hidden');copy.removeAttribute('aria-hidden')}
+ if(trigger){trigger.setAttribute('aria-label',card.getAttribute('aria-label')+(phone?' 상세 내용 보기':' 포스터 크게 보기'));if(phone)trigger.setAttribute('aria-expanded',String(flipped));else trigger.removeAttribute('aria-expanded')}
+}
+function flipEvent(card,flipped){card.classList.toggle('is-flipped',flipped);syncEventFace(card);const target=card.querySelector(flipped?'.event-flip-back':'.event-poster-zoom');setTimeout(()=>{if(card.classList.contains('is-flipped')===flipped)target?.focus({preventScroll:true})},matchMedia('(prefers-reduced-motion:reduce)').matches?0:720)}
+eventPhone.addEventListener('change',()=>content.querySelectorAll('.event-card').forEach(card=>{card.classList.remove('is-flipped');syncEventFace(card)}));
